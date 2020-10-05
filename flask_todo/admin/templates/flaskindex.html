@@ -28,6 +28,13 @@
 			background-color: #722FFA;
 			color: white;
 		}
+		
+		img
+		{
+			height: 50%;
+			width: 100%;
+			border-radus: 8px;
+		}
 	</style>
 {%endblock%}
 {% block header %}
@@ -48,12 +55,15 @@
 		<input type="submit" value="Submit" />
 	</form>
 	
+	
 	<h1>A table of all of the data held within the database(available if you select the option from above in the dropdown)</h1>
 	{% for item in values %}
 		<p class="data1">Name: {{item.name}}</p>
 		<p class="data2">Email: {{item.email}}</p>
 	{% endfor %}
+	
+	<image src="{{ url_for('static', filename='Images/code-matrix.jpg')}}" >
 {%endblock%}
-
+ 
 {% block usr%}
 {%endblock%}

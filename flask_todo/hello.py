@@ -1,9 +1,14 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from datetime import timedelta
-app = Flask(__name__)
+from admin.blueprint import blueprint #this is possible because my empty __init__.py file allows me to access files from different folders
 import pyserver as song
 from flask_sqlalchemy import SQLAlchemy #import at shell using: pip install flask-sqlalchemy
 
+app = Flask(__name__)
+app.register_blueprint(blueprint, url_prefix="/admin")
+'''
+if the url prefix is as above, it will pass the rest ofthe url to my blueprint file 
+'''
 app.secret_key = "bro"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
