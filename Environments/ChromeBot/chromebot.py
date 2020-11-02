@@ -8,7 +8,7 @@ import time
 Keys can be used to get and emulate key presses
 '''
 
-PATH = "C:\Program Files (x86)\chromedriver.exe"
+PATH = "/Users/mac/Downloads/chromedriver 07-46-24-288"
 driver = webdriver.Chrome(PATH)
 
 driver.get("http://127.0.0.1:5000/login")

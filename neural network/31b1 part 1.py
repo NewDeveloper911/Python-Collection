@@ -14,7 +14,7 @@ else:
 while(endit == False):
     number = float(input("Enter  number:"))
     problem(number)
-    endcode = input("Do you want to continue?\n press enter to continue\n")
+    endcode = input("Do you want to continue?\n Type 'yes' and press enter to continue\n")
     if(endcode.upper() == "YES"):
         endit = False
     else:

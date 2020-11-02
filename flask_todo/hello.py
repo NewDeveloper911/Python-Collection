@@ -41,7 +41,7 @@ def view():
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    if request.method == "POST": #POST is much more secure than GET
+    if request.method == "POST": #POST is used to add information; GET is used to get information
         session.permanent = True #whether my data will remian after i come off the website
         user = request.form["nm"] #gets the data from the 'nm' key in a dictionary
         session["user"] = user #a session is made for the user which is logged in

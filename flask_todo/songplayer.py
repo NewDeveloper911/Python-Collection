@@ -1,3 +1,4 @@
+
 import speech_recognition as sr
 from gtts import gTTS
 import os
@@ -17,5 +18,9 @@ def funkymusic(songfile):
                 print("Now playing - " + songfile)
                 play.playsound(os.path.abspath(os.path.join(root, name)))
 
-
-
+song = input("Would you like to play a song? If so, which song would you like to play?\n Don't forget to state the directory, if possible\n")
+try:
+	funkymusic(song)
+except:
+	print("Unfortunately, we couldn't find and play this song for you")
+print("Thanks for utilising this python script")
