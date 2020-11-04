@@ -1,11 +1,12 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from datetime import timedelta
-from admin.blueprint import blueprint #this is possible because my empty __init__.py file allows me to access files from different folders
+from admin.blueprint import blueprint, todoapp #this is possible because my empty __init__.py file allows me to access files from different folders
 import pyserver as song
 from flask_sqlalchemy import SQLAlchemy #import at shell using: pip install flask-sqlalchemy
 
 app = Flask(__name__)
 app.register_blueprint(blueprint, url_prefix="/admin")
+app.redgister_blueprint(todoapp, url_prefix="/todo")
 '''
 if the url prefix is as above, it will pass the rest ofthe url to my blueprint file 
 '''
