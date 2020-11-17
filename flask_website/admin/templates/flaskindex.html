@@ -50,12 +50,13 @@
 	<p>This website is the collection of my Flask skill taught to me by Tech With Tim. I am a  man of honour, so I like to give credit where it is due</p>
 	
 	<form action="#" method="POST">
-		<input type="email" name="email" placeholder="Enter email" value="{{email if email}}"/>
+		<input style="width: 30%;" type="email" name="email" placeholder="Enter email" value="{{email if email}}"/>
 		<input type="submit" name="Submit" value="Submit" />
 	</form>
 	
-	
-	<h1>A table of all of the data held within the database(available if you select the option from above in the dropdown)</h1>
+	{% if values%}
+		<h1>A table of all of the data held within the database</h1>
+	{% endif%}
 	{% for item in values %}
 		<p class="data1">Name: {{item.name}}</p>
 		<p class="data2">Email: {{item.email}}</p>

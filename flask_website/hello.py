@@ -1,37 +1,60 @@
-from flask import Flask, redirect, url_for, render_template, request, session, flash
-from datetime import timedelta
-from admin.blueprint import blueprint, todoapp #this is possible because my empty __init__.py file allows me to access files from different folders
-import pyserver as song
+from flask import Flask, redirect, url_for, render_template,request, session, flash, g
+from admin.blueprint import blueprint #this is possible because my empty __init__.py file allows me to access files from different folders
+#import songify as song #This can be used to play songs currently downloaded on device
 from flask_sqlalchemy import SQLAlchemy #import at shell using: pip install flask-sqlalchemy
+from admin.flaskserver import todo
+import logging
+from flask_migrate import Migrate
+from databases import db, users #This allows me to access databases in other files
+
 
 app = Flask(__name__)
+
+@app.before_request
+def load_user():
+    g.user = None
+
+    if 'user' in session:
+        user = User.query.filter_by(username=session['user']).first()
+        app.logger.info("we have identified the location of the user in session")
+        app.logger.info(str(session.get('user')) + " - We have added the user to g so that it is globally accessible across functions.")
+        g.user = session['user']
+
+
+#Sets up my configuration files for my website to hide private information as well
+if app.config['ENV'] == "production":
+    app.config.from_object("config.ProductionConfig")
+elif app.config['ENV'] == "development":
+    app.config.from_object("config.DevelopmentConfig")
+else:
+    app.config.from_object("config.TestingConfig")
+
 app.register_blueprint(blueprint, url_prefix="/admin")
-app.redgister_blueprint(todoapp, url_prefix="/todo")
+app.register_blueprint(todo, url_prefix="/todo")
+
+logging.basicConfig(level=logging.DEBUG)
+
 '''
 if the url prefix is as above, it will pass the rest ofthe url to my blueprint file 
 '''
-app.secret_key = "bro"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.sqlite3'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.permanent_session_time = timedelta(hours=2)
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.sqlite3'
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#app.permanent_session_time = timedelta(hours=2)
 
-db = SQLAlchemy(app)
+#This will set up our website using the configuration settings from config.py
 
-class users(db.Model):
-    _id = db.Column("id", db.Integer, primary_key=True) 
-    '''
-    For those unaware of SQL, I have set a column(field using the SQL jargon) called 'id' which will be my primary_key. The primary key is used to identify the different types of records(rows) which each hold data about the different users. This means that the primary key has to be unique here for each of the users, in order to find the right data. Each column can only hold data of a certain type, so I have used integers because it is simplest
-    '''
-    name = db.Column("name", db.String(100))
-    email = db.Column(db.String(100))
-    '''
-    the number in the brackets next to db.String define the maximum length of the strings allowed within that colummn
-    '''
-    
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
-    
+#db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+db.init_app(app)
+
+@app.route('/')
+def index():
+    #print(app.config)
+    app.logger.info(app.config) #I use this so I can see print messages while 
+    #running my Flask file at the same time - not possible on Mac apparantly
+    return render_template("flaskindex.html")
+    #render_template just gets rid of complaints from flask
+    app.logger.info(metadata.tables.keys())
 @app.route("/<name>")
 def homepage(name):
     return render_template("flaskindex.html", content=name)
@@ -42,60 +65,68 @@ def view():
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    if request.method == "POST": #POST is used to add information; GET is used to get information
-        session.permanent = True #whether my data will remian after i come off the website
-        user = request.form["nm"] #gets the data from the 'nm' key in a dictionary
-        session["user"] = user #a session is made for the user which is logged in
-        found_user = users.query.filter_by(name=user).first() #how we will check for users in the database
-        if found_user:
-            session["email"] = found_user.email
-            session["user"] = found_user.name
-        else:
-            usr = users(user, "")
-            db.session.add(usr)
-            db.session.commit() #commits change to databse. like git
-            
-        flash("Login successful!") #prints a line with the message shown
-        return redirect(url_for("user"))
-    else:
-        if "user" in session:
-            flash("You are already logged in")
-            return redirect(url_for("user"))
-        return render_template("login.html")
+    if request.method == "POST":
+        session.pop('user', None)
 
-@app.route("/logout")
+        username = request.form['nm'] #searches for name submitted at login page
+        found_user = users.query.filter_by(name=username).first() #checks to see if user exists in database
+
+        #If error shows, that means for now that user doesn't exist
+        app.logger.info(found_user.name) #prints to console during runtime (can't use print now)
+        if found_user: #If existing user
+            session['user'] = found_user.name #creates new session for user
+            detail = session.get('user')
+            app.logger.info(str(detail) + " - Hooray, we are logged in.")
+            return redirect(url_for('user', detail=session)) #redirects to user-only content
+        
+        flash("Unfortunately, we have an internal error at our servers. Either your account doesn't exist or we have a bug.")
+        return redirect(url_for('login'))
+
+    return render_template("login.html")
+
+@app.route("/logout", methods=['POST', 'GET'])
 def logout():
-    flash("Logout successful", "Information")
-    session.pop("user", None) #removes data once logged out so nobody else can see
-    session.pop("email", None)
-    return redirect(url_for("login"))
-
-@app.route("/user", methods=["POST", "GET"])
-def user():
-    email = None
-    if "user" in session:
-        user = session["user"]
-        #return f"<h1>{user}</h1>" #prints the user's name on the screen
-        if request.method == "POST":
-            email = request.form["email"]
-            session["email"] = email
-            found_user = users.query.filter_by(name=user).first()
-            found_user.email = email
-            db.session.commit()
-            flash("Email has been saved successfully")
-        else:
-            if "email" in session:
-                email = session["email"]
-                
-        return render_template("flaskindex.html", user=user, email=email)
+    session.pop('user', None)
+    return redirect(url_for('login'))
+    
+@app.route("/user/<detail>", methods=['POST','GET'])
+def user(detail):
+    if detail:
+        #return render_template("flaskindex.html", user=g.user.name)
+        app.logger.info("Bruh, what is going on, " + str(detail))
     else:
-        flash("You are not logged in yet, you should login in for full access to all features")
-        return redirect(url_for("login"))
+        app.logger.info(str(session.get('user')) + " - str(g.user) doesn't work in the other one but somehow works here")
+        return render_template("flaskindex.html", user="Anonymous User created from a mistake")
 
+    if request.method == "POST":
+        email = request.form["email"]
+        session["email"] = email
+
+        found_user = users.query.filter_by(name=str(detail)).first()
+        found_user.email = email
+
+        db.session.commit()
+        flash("Email has been saved successfully")
+        app.logger.info("Your email, which is " + str(session.get('email')) + " has been saved successfully")
+        return render_template("flaskindex.html", user=str(detail))
+    else:
+        if "email" in session:
+            email = session["email"]
+            app.logger.info("Email has been set firmly")
+            return render_template("flaskindex.html", user=str(detail))
+        if detail:
+            return render_template("flaskindex.html", user=str(detail))
+        else:
+            app.logger.info("Tried to skip the queue, huh? Your mistake.")
+            flash("You are not logged in yet, you should login in for full access to all features")
+            return redirect(url_for("login"))           
+
+'''
 @app.route('/play')
 def playsong():
     song.funkymusic("Kanskaart - Congratulations (100K Special).mp3")
+'''
 
 if __name__ == "__main__":
-    db.create_all() #creates the database in case it doesn't already exist
+    #db.create_all() #creates the database in case it doesn't already exist
     app.run(debug=True)
