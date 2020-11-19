@@ -77,10 +77,15 @@ def login():
             session['user'] = found_user.name #creates new session for user
             detail = session.get('user')
             app.logger.info(str(detail) + " - Hooray, we are logged in.")
-            return redirect(url_for('user', detail=session)) #redirects to user-only content
+            return redirect(url_for('user', detail=detail)) #redirects to user-only content
         
         flash("Unfortunately, we have an internal error at our servers. Either your account doesn't exist or we have a bug.")
         return redirect(url_for('login'))
+
+    else:
+        if 'user' in session:
+            app.logger.info("You are already logged in")
+            return redirect(url_for('user', detail=session.get('user'))) #redirects to user-only content
 
     return render_template("login.html")
 
