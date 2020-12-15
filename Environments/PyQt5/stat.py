@@ -153,7 +153,7 @@ class Ui_MainWindow(object):
         self.pushButton_2.clicked.connect(self.show_mountain)
         
     def show_mountain(self):
-          self.PictureMap.setPixmap(QtGui.QPixmap("../Desktop/mountain.jpg"))
+          self.PictureMap.setPixmap(QtGui.QPixmap("/Users/mac/Downloads/Screen Shot 2020-04-25 at 15.08.33.JPG"))
 
     def show_chicken(self):
           self.PictureMap.setPixmap(QtGui.QPixmap("../Desktop/kfc secret spice blend#1.PNG"))  
