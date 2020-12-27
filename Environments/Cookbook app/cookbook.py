@@ -30,7 +30,7 @@ elif recipe.upper() == "CABSAUCE":
 elif recipe.upper() == "MUGCAKE":
     import mugcake as mug
 
-    mug.greeting("Yaw Brobbey")
+    mug.greeting("Guest user")
     print("For the amounts below, remember that a teaspoon is 5ml and a tablespoon is 15ml")
     mug.minimum(60, 45, 2.5, 2, 45, 15, 5)
     mug.smallest(0,60, 45, 2.5, 2, 45, 15, 5)
