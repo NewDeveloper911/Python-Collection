@@ -4,78 +4,185 @@
 	<style>
 		*
 		{
-			background-color: #16FABB;
+			background-color: #A3FFA1;
 			color: black;
 		}
 		
 		h1
 		{
-			background-color: #5CE649;
+			background-color:#FFFF9E;
+		}
+
+		h2{
+			background-color: #94FFE9;
+			color: black;
 		}
 		
 		button
 		{
-			background-color: #09E368;
+			background-color: #87E8AD;
 			color: black;
 		}
-		p.data1
+
+		a.delete
 		{
-			background-color: #FAEB0A;
-			color: black;
+			color: #FFFF9E;
 		}
-		p.data2
-		{
-			background-color: #722FFA;
-			color: white;
-		}
-		
+
 		img
 		{
 			height: 50%;
 			width: 100%;
 		}
+
+		.popup, .overlay
+		{
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			width: 100vw;
+			height: 100vh;
+			background: rgba(0,0,0,0.7);
+			z-index: 1;
+			display: none;
+		}
+
+		.popup, .content
+		{
+			position: absolute;
+			transform:translate(-50%,-50%) scale(0);
+			background: #fff;
+			width: 450px;
+			height: 250px;
+			z-index: 2;
+			text-align: center;
+			padding: 20px;
+			box-sizing: border-box;
+
+		}
+
+		.popup, .close-button
+		{
+			cursor: pointer;
+			position: absolute;
+			right: 20px;
+			top: 20px;
+			width: 30px;
+			height: 30px;
+			background: #111000;
+			color: #fff;
+			font-size: 25px;
+			font-weight: 600;
+			line-height: 30px;
+			text-align: center;
+			border-radius: 50%;
+		}
+
+		.popup.active, .overlay
+		{
+			display: block;
+		}
+
+		.popup.active, .content
+		{
+			transition: all 1.5s ease-in-out;
+			transform:translate(50%,-50%) scale(1);
+		} 
+
+		.scale-in-center {
+			display: visible;
+	-webkit-animation: scale-in-center 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+	        animation: scale-in-center 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+@-webkit-keyframes scale-in-center {
+  0% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes scale-in-center {
+  0% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
 	</style>
 {%endblock%}
 {% block header %}
-<h1> Welcome to your collections of tasks. Here, you can modify and view your tasks</h1>	
+<h1 class="scale-in-center"> Welcome, {{user.name}}, to your collections of tasks. Here, you can modify and view your tasks</h1>	
 {% endblock %}
 {%block content%}
 	
 	<p>This website is the collection of my Flask skill taught to me by Tech With Tim. I am a  man of honour, so I like to give credit where it is due</p>
     <div> Add a new task here:
 		<form action="/todo/add" method="POST">
-			<input style="width: 30%;" type="text" name="task">
+			<input style="width: 30%;" type="text" name="task" id="task">
 			<input type="submit" value="Add new task">
 		</form> 
 	</div>
+
     <div>
-		<!-- <form action="/todo/update" method="POST"> -->
 			<h2>Incomplete tasks</h2>
 			<ul>
-				{%	for i in todo_list%}
-				<li > {{i.body}} <a style="font-size: 15px" href="{{url_for('todo.complete', id=i.id)}}">Mark as complete</a></li>
-				<!-- 
-					<li> <input name="{{i.id}}" type="checkbox"> {{i.body}}</li>
-					This code can be used for checkboxes but can't be detected by 
-					forms which will be very important later on when detectingx
-					complete and incomplete tasks
-				-->
-				{% endfor %}
+				{% if todo_list%}
+					{%for i in todo_list%}
+							<li > {{i.body}} <a style="font-size: 15px" href="{{url_for('todo.complete', id=i.id)}}">Mark as complete</a></li>
+							<!-- 
+								<li> <input name="{{i.id}}" type="checkbox"> {{i.body}}</li>
+								This code can be used for checkboxes but can't be detected by 
+								forms which will be very important later on when detectingx
+								complete and incomplete tasks
+							-->
+					{% endfor%}
+				{%endif%}
 			</ul>
-			<h2>Completed task</h2>
+	</div>
+	<div>
+			<h2>Completed tasks</h2>
 			<ul>
-				{% for i in completed_todos%}
-					<li> {{i.body}} <a style="font-size: 15px" href="{{url_for('todo.incomplete', id=i.id)}}">Mark as incomplete</a> <a style="font-size: 15px" href="">Delete this task</a></li>
-				{% endfor%}
+				{%for i in Completed%}
+					 	<li> {{i.body}} <a style="font-size: 15px" href="{{url_for('todo.incomplete', id=i.id)}}">Mark as incomplete</a> <a class="delete" style="font-size: 15px" href="{{url_for('todo.delete', id=i.id)}}">Delete this task</a></li>
+				{%endfor%}
 			</ul>
 
-			<input type="submit" value="Update Items">
 		<!-- </form> -->
 	</div>
 
+<image src="{{ url_for('.static', filename='Images/code-matrix.jpg')}}"> </image>
 	
-	<image src="{{ url_for('static', filename='Images/code-matrix.jpg')}}" >
+
+<!--<script>
+	<div class="popup" id="popup1">
+		<div class="overlay"> 
+			<div class="content"> 
+				<div class="close-button" onclick="TogglePopup()"> &times;</div>
+				<h1> Task has been dealt with successfully</h1>
+				<p> The task selected has been successfully deleted. 
+					Worry not.</p>
+				<button type="button" onclick="TogglePopup()">Click to deactivate popup</button>
+			</div>
+		</div>
+	</div>
+<button type="button" onclick="TogglePopup()">Click to activate JavaScript</button>
+		function TogglePopup()
+		{
+			document.getElementById("popup1").classList.toggle("active");
+		}
+	</script>-->
 {%endblock%}
- 
-{% block usr%}
-{%endblock%}
+

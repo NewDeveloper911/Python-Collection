@@ -1,7 +1,10 @@
 from setuptools import setup
 
     setup(
-        name='hello',
+        name='home',
         packages=['admin'],
         include_package_data=True
+        install_requires=[
+            'flask'
+        ]
     )

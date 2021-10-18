@@ -1,16 +1,17 @@
 from datetime import timedelta
+import os
 
 '''
 This file controls the variables for any configurations in Flask that I may want to use
 later on in the development of the website
 '''
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     DEBUG = False
     TESTING = False
 
-    SECRET_KEY = "2r9hf9bpihf9027"
-
+    SECRET_KEY = os.urandom(16)
     DB_NAME = "database"
     DB_USERNAME = "root"
     DB_PASSWORD = "password"
@@ -19,13 +20,17 @@ class Config(object):
 
     SESSION_COOKIE_SECURE = True #Cookies are transferred if connected to HTTPS 
 
-    SESSION_COOKIE_SAMESITE="None"
+    SESSION_COOKIE_SAMESITE="Lax"
 
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///users.sqlite3'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///admin/users.sqlite3'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     PERMANENT_SESSION_TIME = timedelta(hours=3)
+
+    WHOOSH_BASE = os.path.join(basedir, 'users.sqlite3')
+
+    MAX_SEARCH_RESULTS = 50
 
 class ProductionConfig(Config):
     #Inherits all data and attributes of config class

@@ -19,31 +19,43 @@
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
+    {% if user.is_authenticated%}
       <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/login">Login</a>
+        <a class="nav-link" href="/learning/view">Home <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Dropdown
+          Additional features
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Action</a>
-          <a class="dropdown-item" href="/view">View database</a>
+          <a class="dropdown-item" href="/learning/add">Contribute</a>
+          <a class="dropdown-item" href="/learning/view">View all posts</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/todo/">View my to-do list</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="/logout">Log out</a>
+           <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/user/edit_profile/<detail>">Edit profile</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/user/edit_details/<detail>">Edit about me</a>
         </div>
       </li>
+    {%else %}
       <li class="nav-item">
-        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled,just like your mum</a>
+        <a class="nav-link" href="/login">Login</a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/signup">Sign up</a>
+      </li>
+    {%endif%}
+      <!-- 
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+        </li>
+      -->
     </ul>
-    <form class="form-inline my-2 my-lg-0">
-      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+    <form class="form-inline my-2 my-lg-0" method="post" action="/learning/view">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search for desired knowledge" aria-label="Search" name="post_search">
       <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
     </form>
   </div>
@@ -65,14 +77,32 @@
            I still can't afford proper hosting at this point in time but however, I can use Flask to emulate hosting and create web applicatioons based on Python using Flask, which is very helpful.
         </p>
 		-->
-		{%block usr%}
-		
-		{%endblock%}
+
+    {% with messages  = get_flashed_messages(with_categories=true)%}
+      {% if messages%}
+        {% for category, msg in messages%}
+                  {% if category == 'error'%}
+                      <div class="alert alert-danger alter-dismissable fade show" role="alert"> </div>
+                          {{msg}}
+                          <button type="button" class="close" data-dismiss="alert">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
+                      </div>
+                  {%endif%}
+                  {% else%}
+                      <div class="alert alert-success alter-dismissable fade show" role="alert"> </div>
+                          {{msg}}
+                          <button type="button" class="close" data-dismiss="alert">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
+                      </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
 		{%block content%}
 		
 		{%endblock%}
-		
-        <button> <a href="/play">Play a song</a></button>
 		
 	
 		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
