@@ -98,3 +98,4 @@ import matplotlib.pyplot as plt
 x, y = create_data(100,3)
 plt.scatter(x[:, 0], x[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
 plt.show()
+
