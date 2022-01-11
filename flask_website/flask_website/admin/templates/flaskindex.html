@@ -1,0 +1,68 @@
+{%extends "base.html"%}
+{%block title%} Base page of Flask application{%endblock%}
+{%block style%}
+	<style>
+		*
+		{
+			background-color: #16FABB;
+			color: black;
+		}
+		
+		h1
+		{
+			background-color: #5CE649;
+		}
+		
+		button
+		{
+			background-color: #09E368;
+			color: black;
+		}
+		p.data1
+		{
+			background-color: #FAEB0A;
+			color: black;
+		}
+		p.data2
+		{
+			background-color: #722FFA;
+			color: white;
+		}
+		
+		img
+		{
+			height: 50%;
+			width: 100%;
+		}
+	</style>
+{%endblock%}
+{% block header %}
+<h1> Welcome, {{user}}, to my first ever functioning Flask application</h1>	
+{% endblock %}
+{%block content%}
+	{% with messages  = get_flashed_messages()%}
+		{% if messages%}
+			{% for msg in messages%}
+				<p>{{msg}}</p>
+			{% endfor %}
+		{% endif %}
+	{% endwith %}
+	<p>This website is the collection of my Flask skill taught to me by Tech With Tim. I am a  man of honour, so I like to give credit where it is due</p>
+	
+	<form action="#" method="POST">
+		<input style="width: 30%;" type="email" name="email" placeholder="Enter email" value="{{email if email}}"/>
+		<input type="submit" name="Submit" value="Submit" />
+	</form>
+	
+	{% if values%}
+		<h1>A table of all of the data held within the database</h1>
+	{% endif%}
+	{% for item in values %}
+		<p class="data1">Name: {{item.name}}</p>
+		<p class="data2">Email: {{item.email}}</p>
+	{% endfor %}
+	
+{%endblock%}
+ 
+{% block usr%}
+{%endblock%}

@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <meta http-equiv="refresh" content="30">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--<link rel = "stylesheet" type = "text/css" href = "stylesheet2.css">-->
+		<link rel="stylesheet"  type = "text/css" href="{{ url_for('static', filename='Stylesheets/stylesheet2.css')}}" />
+        <title>Home page</title>
+		
+    </head>
+    <body>
+
+        <header>
+            <h1>Welcome to my first ever functioning Flask application</h1>
+            <ul>
+                <li class="nav"><a href="Nana Yaw">Nana Yaw</a></li>
+                <li class="nav"><a href="Mum">Mum</a></li>
+                <li class="nav"><a href="Abena Asabea">Abena Asabea</a></li>
+                <li class="nav"><a href="Dad">Dad</a></li>
+              </ul>
+        </header>
+		  
+          <h2>Why have I decided to make yet another website despite not being able to afford hosting?</h2>
+          <p>
+            <img src="{{url_for('static', filename='Images/html.jpg')}}" alt="html" style="float:left;width:400-px;height:100px;">
+			Welcome, {{content}}, to my glorious display of server management.
+           I still can't afford proper hosting at this point in time but however, I can use Flask to emulate hosting and create web applicatioons based on Python using Flask, which is very helpful.
+        </p>
+
+        <p>
+        The button below that actually works will take you to the coding webpage. Cool
+        </p>
+
+        <button onclick="document.location = 'Coding abilities.html'">Coding teleportation</button>
+    </body>
+</html>
