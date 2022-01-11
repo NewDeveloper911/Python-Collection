@@ -95,7 +95,7 @@
 	{% endif %}
 
 	{%if user%}
-		<img src="{{ item.author.avatar(100) }}" style="float:left;width:20%;height:20%">
+		<img src="{{ user.avatar(100) }}" style="float:left;width:20%;height:20%">
 		<h2>{{user.name}}</h2>
 		<h3> About me </h3>
 		<p> {{user.about_me}}</p>

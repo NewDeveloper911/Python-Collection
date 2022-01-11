@@ -19,7 +19,7 @@ def funkymusic(songfile):
     #The following line checks for all song file locations on Mac
     #The line below will show to code for Windows users
     #for root, dirs, files in os.walk(r'/C:'):
-    for root, dirs, files in os.walk(r'/Users/mac'):
+    for root, dirs, files in os.walk(r'C:/'):
         for name in files:
             if name not in stored_songs and name[-4:] == ".mp3" or name[-4:] == ".wav":
                 stored_songs.append(name)

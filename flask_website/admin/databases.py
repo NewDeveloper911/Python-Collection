@@ -1,18 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy.sql import func
-from .logs import *
 from hashlib import md5
-
-import sys
-if sys.version_info >= (3, 0):
-    enable_search = False
-    error("We are unable to use whoosh_alchemy")
-else:
-    enable_search = True
-    import flask_whooshalchemy as whooshalchemy
-
-db = SQLAlchemy()
+from flask import Flask
+from hello import db
 
 class users(db.Model, UserMixin):
     #__tablename__ = "users"
@@ -78,5 +69,3 @@ class Learning(db.Model):
 
     pass
 
-if enable_search:
-    whooshalchemy.whoosh_index(app, Learning)

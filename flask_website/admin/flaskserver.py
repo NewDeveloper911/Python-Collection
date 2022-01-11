@@ -2,9 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 import sys
 import logging
 from flask_sqlalchemy import SQLAlchemy
-from ..databases import db,users, Todo
+from .databases import db,users, Todo
 from flask_login import login_required, current_user
-from ..logs import *
 
 todo = Blueprint("todo",  __name__, static_folder="static", template_folder="templates")
 

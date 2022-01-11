@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
 import logging
-from .databases import db, users, Todo, Learning
+from .admin.databases import db, users, Todo, Learning
 import flask_website.config as config
 
 from whoosh.filedb.filestore import FileStorage

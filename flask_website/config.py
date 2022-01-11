@@ -16,19 +16,19 @@ class Config(object):
     DB_USERNAME = "root"
     DB_PASSWORD = "password"
 
-    UPLOADS = "/Users/mac/MacPython/Hacktoberfest2020/Python-Collection/flask_website/admin/static/Images"
+    UPLOADS = r"D:\Programming\NEA\NEA project\Production"
 
     SESSION_COOKIE_SECURE = True #Cookies are transferred if connected to HTTPS 
 
     SESSION_COOKIE_SAMESITE="Lax"
 
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///admin/users.sqlite3'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////C:\Users\Nana Yaw\Python-Collection\flask_website\admin\users.sqlite3'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     PERMANENT_SESSION_TIME = timedelta(hours=3)
 
-    WHOOSH_BASE = os.path.join(basedir, 'users.sqlite3')
+    WHOOSH_BASE = 'sqlite:////C:\Users\Nana Yaw\Python-Collection\flask_website\admin\users.sqlite3'
 
     MAX_SEARCH_RESULTS = 50
 
@@ -44,7 +44,7 @@ class DevelopmentConfig(Config):
     DB_USERNAME = "todouser"
     DB_PASSWORD = "flask"
 
-    UPLOADS = "/Users/mac/MacPython/Hacktoberfest2020/Python-Collection/flask_website/admin/templates"
+    UPLOADS = r"D:\Programming\NEA\NEA project\Development"
 
 class TestingConfig(Config):
     TESTING = True
@@ -54,7 +54,7 @@ class TestingConfig(Config):
     DB_USERNAME = "example"
     DB_PASSWORD = "test"
 
-    UPLOADS = "/Users/mac/MacPython/Hacktoberfest2020/Python-Collection/flask_website/flaskenv/development"
+    UPLOADS = r"D:\Programming\NEA\NEA project\Testing"
 
     SESSION_COOKIE_SECURE = False
 

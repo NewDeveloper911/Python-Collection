@@ -1,25 +1,27 @@
-from flask import Flask, redirect, url_for, render_template,request, session, flash, g
+from flask import  Blueprint, Flask, redirect, url_for, render_template,request, session, flash, g
 from admin.blueprint import blueprint #this is possible because my empty __init__.py file allows me to access files from different folders
 #import songify as song #This can be used to play songs currently downloaded on device
 from flask_sqlalchemy import SQLAlchemy #import at shell using: pip install flask-sqlalchemy
-from admin.flaskserver import todo
+#from admin.flaskserver import todo
+#Need to deal with circular import from hello to flaskserver to databases to hell
 import logging
 from flask_migrate import Migrate
-from databases import db, users #This allows me to access databases in other files
+from admin.databases import db, users #This allows me to access databases in other files
 
 
 app = Flask(__name__)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 @app.before_request
 def load_user():
     g.user = None
 
     if 'user' in session:
-        user = User.query.filter_by(username=session['user']).first()
+        user = users.query.filter_by(username=session['user']).first()
         app.logger.info("we have identified the location of the user in session")
         app.logger.info(str(session.get('user')) + " - We have added the user to g so that it is globally accessible across functions.")
         g.user = session['user']
-
 
 #Sets up my configuration files for my website to hide private information as well
 if app.config['ENV'] == "production":
@@ -34,30 +36,17 @@ app.register_blueprint(todo, url_prefix="/todo")
 
 logging.basicConfig(level=logging.DEBUG)
 
-'''
-if the url prefix is as above, it will pass the rest ofthe url to my blueprint file 
-'''
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.sqlite3'
-#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#app.permanent_session_time = timedelta(hours=2)
-
-#This will set up our website using the configuration settings from config.py
-
-#db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-db.init_app(app)
-
 @app.route('/')
 def index():
     #print(app.config)
-    app.logger.info(app.config) #I use this so I can see print messages while 
+    #app.logger.info(app.config) #I use this so I can see print messages while 
     #running my Flask file at the same time - not possible on Mac apparantly
-    return render_template("flaskindex.html")
+    return render_template("flaskindex.html", user=session.get('user'))
     #render_template just gets rid of complaints from flask
-    app.logger.info(metadata.tables.keys())
+    #app.logger.info(metadata.tables.keys())
 @app.route("/<name>")
 def homepage(name):
-    return render_template("flaskindex.html", content=name)
+    return render_template("flaskindex.html", user=session.get('user'), content=name)
 
 @app.route("/view")
 def view():
@@ -87,7 +76,7 @@ def login():
             app.logger.info("You are already logged in")
             return redirect(url_for('user', detail=session.get('user'))) #redirects to user-only content
 
-    return render_template("login.html")
+    return render_template("login.html", user=session.get('user'))
 
 @app.route("/logout", methods=['POST', 'GET'])
 def logout():
@@ -126,12 +115,6 @@ def user(detail):
             flash("You are not logged in yet, you should login in for full access to all features")
             return redirect(url_for("login"))           
 
-'''
-@app.route('/play')
-def playsong():
-    song.funkymusic("Kanskaart - Congratulations (100K Special).mp3")
-'''
-
 if __name__ == "__main__":
-    #db.create_all() #creates the database in case it doesn't already exist
+    db.create_all() #creates the database in case it doesn't already exist
     app.run(debug=True)
