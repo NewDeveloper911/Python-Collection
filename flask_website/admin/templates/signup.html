@@ -35,13 +35,14 @@
 		{% endif %}
 	{% endwith %}
 
-<h2> Sign up form</h2>
+<h2>Sign up form</h2>
 
 <form method="POST">
 	<p><input type="text" name="nm" placeholder="Enter your username"/></p>
-	<p><input type="text" name="password" placeholder="Enter password"/></p>
+	<p><input type="text" name="email" placeholder="Enter your email"/></p>
+	<p><input type="text" name="password1" placeholder="Enter password"/></p>
+	<p><input type="text" name="password2" placeholder="Confirm password"/></p>
 	<p><input type="submit" name="Submit" value="Submit" /></p>
 </form>
-<a href="\signup" class="btn btn-primary">Sign up</a>
 
-{% endblock %}
+{%endblock%}

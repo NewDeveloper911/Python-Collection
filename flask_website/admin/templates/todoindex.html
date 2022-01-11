@@ -41,7 +41,6 @@
 {% endblock %}
 {%block content%}
 	
-	<p>This website is the collection of my Flask skill taught to me by Tech With Tim. I am a  man of honour, so I like to give credit where it is due</p>
     <div> Add a new task here:
 		<form action="/todo/add" method="POST">
 			<input style="width: 30%;" type="text" name="task">
@@ -65,7 +64,7 @@
 			<h2>Completed task</h2>
 			<ul>
 				{% for i in completed_todos%}
-					<li> {{i.body}} <a style="font-size: 15px" href="{{url_for('todo.incomplete', id=i.id)}}">Mark as incomplete</a> <a style="font-size: 15px" href="">Delete this task</a></li>
+					<li> {{i.body}} <a style="font-size: 15px" href="{{url_for('todo.incomplete', id=i.id)}}">Mark as incomplete</a> <a style="font-size: 15px" href="{{url_for('todo.delete', id=i.id)}}">Delete this task</a></li>
 				{% endfor%}
 			</ul>
 
@@ -74,8 +73,8 @@
 	</div>
 
 	
-	<image src="{{ url_for('static', filename='Images/code-matrix.jpg')}}" >
+	<image src="{{ url_for('admin.static', filename='Images/code-matrix.jpg')}}" >
+	
+	<p>This website is the collection of my Flask skill taught to me by Tech With Tim. I am a  man of honour, so I like to give credit where it is due</p>
 {%endblock%}
  
-{% block usr%}
-{%endblock%}
