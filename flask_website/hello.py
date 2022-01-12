@@ -1,5 +1,5 @@
+from html.entities import name2codepoint
 from flask import Flask, redirect, url_for, render_template,request, session, flash, g
-from sqlalchemy.sql.expression import or_
 from admin.blueprint import blueprint #this is possible because my empty __init__.py file allows me to access files from different folders
 #import songify as song #This can be used to play songs currently downloaded on device
 from flask_sqlalchemy import SQLAlchemy #import at shell using: pip install flask-sqlalchemy
@@ -55,7 +55,7 @@ def login():
     if request.method == "POST":
         session.pop('user', None)
 
-        username = request.form.get('nm') #searches for name submitted at login page
+        username = request.form.get('nm')#searches for name submitted at login page
         password = request.form.get('password')
         found_user = users.query.filter_by(name=username).first() #checks to see if user exists in database
 
@@ -64,6 +64,7 @@ def login():
             app.logger.info(found_user.name) #prints to console during runtime (can't use print now)
         except:
             app.logger.warning(username + " doesn't exist on our database.")
+            app.logger.warning(users.query.all())
         if found_user: #If existing user
             if check_password_hash(found_user.password, password):
                 session['user'] = found_user.name #creates new session for user
@@ -71,7 +72,6 @@ def login():
                 return redirect(url_for('user', detail=session.get('user'))) #redirects to user-only content
             flash('Incorrect password entered. Please try again', category='error')
         return redirect(url_for('login'))
-
     else:
         if 'user' in session:
             app.logger.info("You are already logged in")
@@ -127,8 +127,15 @@ def signup():
             new_user = users(name=name, email=email, password=generate_password_hash(p1, "pbkdf2:sha512"))
             db.session.add(new_user)
             db.session.commit()
-            session['user'] = users.query.filter_by(name=name).first()
-            return redirect(url_for('user', detail=session['user']))
+            try:  
+                #session['user'] = users.query.filter_by(name=name).first().name
+                #Seem to be unable to search the database
+                return redirect(url_for('user', detail=name))
+            except:
+                app.logger.info("We have a problem, officer. {} is not bein put into the database".format(name))
+                app.logger.info(session.get('user'))
+                app.logger.info(users.query.all())
+            
     return render_template('signup.html')
 
 if __name__ == "__main__":
