@@ -15,7 +15,7 @@ class Config(object):
     DB_USERNAME = "root"
     DB_PASSWORD = "password"
 
-    UPLOADS = "/Users/mac/MacPython/Hacktoberfest2020/Python-Collection/flask_website/admin/static/Images"
+    UPLOADS = r"D:\Programming\NEA\NEA project\Production"
 
     SESSION_COOKIE_SECURE = True #Cookies are transferred if connected to HTTPS 
 
@@ -39,7 +39,7 @@ class DevelopmentConfig(Config):
     DB_USERNAME = "todouser"
     DB_PASSWORD = "flask"
 
-    UPLOADS = "/Users/mac/MacPython/Hacktoberfest2020/Python-Collection/flask_website/admin/templates"
+    UPLOADS = r"D:\Programming\NEA\NEA project\Development"
 
 class TestingConfig(Config):
     TESTING = True
@@ -49,7 +49,7 @@ class TestingConfig(Config):
     DB_USERNAME = "example"
     DB_PASSWORD = "test"
 
-    UPLOADS = "/Users/mac/MacPython/Hacktoberfest2020/Python-Collection/flask_website/flaskenv/development"
+    UPLOADS = r"D:\Programming\NEA\NEA project\Testing"
 
     SESSION_COOKIE_SECURE = False
 

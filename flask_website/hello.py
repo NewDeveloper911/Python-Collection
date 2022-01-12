@@ -6,7 +6,7 @@ from admin.flaskserver import todo
 import logging
 from flask_migrate import Migrate
 from databases import db, users #This allows me to access databases in other files
-
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
@@ -45,18 +45,6 @@ if the url prefix is as above, it will pass the rest ofthe url to my blueprint f
 migrate = Migrate(app, db)
 db.init_app(app)
 
-@app.route('/')
-def index():
-    #print(app.config)
-    app.logger.info(app.config) #I use this so I can see print messages while 
-    #running my Flask file at the same time - not possible on Mac apparantly
-    return render_template("flaskindex.html")
-    #render_template just gets rid of complaints from flask
-    app.logger.info(metadata.tables.keys())
-@app.route("/<name>")
-def homepage(name):
-    return render_template("flaskindex.html", content=name)
-
 @app.route("/view")
 def view():
     return render_template("flaskindex.html",values=users.query.all())
@@ -66,19 +54,27 @@ def login():
     if request.method == "POST":
         session.pop('user', None)
 
-        username = request.form['nm'] #searches for name submitted at login page
+        username = request.form.get('nm')#searches for name submitted at login page
+        password = request.form.get('password')
         found_user = users.query.filter_by(name=username).first() #checks to see if user exists in database
 
-        #If error shows, that means for now that user doesn't exist
-        app.logger.info(found_user.name) #prints to console during runtime (can't use print now)
+        try:
+            #If error shows, that means for now that user doesn't exist
+            app.logger.info(found_user.name) #prints to console during runtime (can't use print now)
+        except:
+            app.logger.warning(username + " doesn't exist on our database.")
+            app.logger.warning(users.query.all())
         if found_user: #If existing user
-            session['user'] = found_user.name #creates new session for user
-            detail = session.get('user')
-            app.logger.info(str(detail) + " - Hooray, we are logged in.")
-            return redirect(url_for('user', detail=session['user'])) #redirects to user-only content
-        
-        flash("Unfortunately, we have an internal error at our servers. Either your account doesn't exist or we have a bug.")
+            if check_password_hash(found_user.password, password):
+                session['user'] = found_user.name #creates new session for user
+                app.logger.info(str(session.get('user')) + " - Hooray, we are logged in.")
+                return redirect(url_for('user', detail=session.get('user'))) #redirects to user-only content
+            flash('Incorrect password entered. Please try again', category='error')
         return redirect(url_for('login'))
+    else:
+        if 'user' in session:
+            app.logger.info("You are already logged in")
+            return redirect(url_for('user', detail=session.get('user'))) #redirects to user-only content
 
     return render_template("login.html")
 
@@ -112,6 +108,35 @@ def user(detail):
             flash("You are not logged in yet, you should login in for full access to all features")
             return redirect(url_for("login"))           
 
+@app.route("/signup", methods=['GET','POST'])
+def signup():
+    if request.method == 'POST':
+        name = request.form.get('nm')
+        email = request.form.get('email')
+        p1 = request.form.get('password1')
+        p2 = request.form.get('password2')
+        if len(email) < 12 and "@" not in email and ".com" not in email:
+            flash("Please input an email in the correct format, containing an @ and a '.com' ", category='warning')
+        elif p1 != p2 or len(p1) == 0 or len(p2) == 0:
+            flash("Please enter the same password in both password input boxes", category='warning')
+        elif len(users.query.filter_by(name=name).all()) > 1 or len(users.query.filter_by(email=email).all()) > 1:
+            flash("Perhaps you already have an account. Try logging in with that account, if you remember the details fully", category='warning')
+            return redirect(url_for('login'))
+        else:
+            new_user = users(name=name, email=email, password=generate_password_hash(p1, "pbkdf2:sha512"))
+            db.session.add(new_user)
+            db.session.commit()
+            try:  
+                #session['user'] = users.query.filter_by(name=name).first().name
+                #Seem to be unable to search the database
+                return redirect(url_for('user', detail=name))
+            except:
+                app.logger.info("We have a problem, officer. {} is not bein put into the database".format(name))
+                app.logger.info(session.get('user'))
+                app.logger.info(users.query.all())
+            
+    return render_template('signup.html')
+
 if __name__ == "__main__":
-    #db.create_all() #creates the database in case it doesn't already exist
+    db.create_all(app=app) #creates the database in case it doesn't already exist
     app.run(debug=True)

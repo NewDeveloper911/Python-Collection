@@ -65,11 +65,10 @@
 			<h2>Completed task</h2>
 			<ul>
 				{% for i in completed_todos%}
-					<li> {{i.body}} <a style="font-size: 15px" href="{{url_for('todo.incomplete', id=i.id)}}">Mark as incomplete</a> <a style="font-size: 15px" href="">Delete this task</a></li>
+					<li> {{i.body}} <a style="font-size: 15px" href="{{url_for('todo.incomplete', id=i.id)}}">Mark as incomplete</a> <a style="font-size: 15px" href="{{url_for('todo.delete', id=i.id)}}">Delete this task</a></li>
 				{% endfor%}
 			</ul>
 
-			<input type="submit" value="Update Items">
 		<!-- </form> -->
 	</div>
 
