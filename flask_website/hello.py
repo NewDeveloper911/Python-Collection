@@ -16,7 +16,9 @@ def load_user():
     g.user = None
 
     if 'user' in session:
-        user = users.query.filter_by(name=session['user']).first()
+        user = User.query.filter_by(username=session['user']).first()
+        app.logger.info("we have identified the location of the user in session")
+        app.logger.info(str(session.get('user')) + " - We have added the user to g so that it is globally accessible across functions.")
         g.user = session['user']
 
 
@@ -86,6 +88,13 @@ def logout():
     
 @app.route("/user/<detail>", methods=['POST','GET'])
 def user(detail):
+    if detail:
+        #return render_template("flaskindex.html", user=g.user.name)
+        app.logger.info("Bruh, what is going on, " + str(detail))
+    else:
+        app.logger.info(str(session.get('user')) + " - str(g.user) doesn't work in the other one but somehow works here")
+        return render_template("flaskindex.html", user="Anonymous User created from a mistake")
+
     if request.method == "POST":
         email = request.form["email"]
         session["email"] = email
@@ -109,6 +118,7 @@ def user(detail):
             flash("You are not logged in yet, you should login in for full access to all features")
             return redirect(url_for("login"))           
 
+<<<<<<< HEAD
 @app.route("/signup", methods=['GET','POST'])
 def signup():
     if request.method == 'POST':
@@ -137,6 +147,13 @@ def signup():
                 app.logger.info(users.query.all())
             
     return render_template('signup.html')
+=======
+'''
+@app.route('/play')
+def playsong():
+    song.funkymusic("Kanskaart - Congratulations (100K Special).mp3")
+'''
+>>>>>>> parent of d7f75c5 (Retrieved a basic functional website, which I shall expand upon)
 
 if __name__ == "__main__":
     db.create_all(app=app) #creates the database in case it doesn't already exist
