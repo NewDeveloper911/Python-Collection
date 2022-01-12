@@ -119,6 +119,7 @@ def user(detail):
             return redirect(url_for("login"))           
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 @app.route("/signup", methods=['GET','POST'])
 def signup():
     if request.method == 'POST':
@@ -148,11 +149,16 @@ def signup():
             
     return render_template('signup.html')
 =======
+=======
+>>>>>>> parent of d7f75c5 (Retrieved a basic functional website, which I shall expand upon)
 '''
 @app.route('/play')
 def playsong():
     song.funkymusic("Kanskaart - Congratulations (100K Special).mp3")
 '''
+<<<<<<< HEAD
+>>>>>>> parent of d7f75c5 (Retrieved a basic functional website, which I shall expand upon)
+=======
 >>>>>>> parent of d7f75c5 (Retrieved a basic functional website, which I shall expand upon)
 
 if __name__ == "__main__":
