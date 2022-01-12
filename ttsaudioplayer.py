@@ -24,13 +24,13 @@ def searchfor(voicename):
         else:
             continue
         
-book = open(search("Bible_study.pdf"), 'rb')
+book = open(search("OfMiceAndMen PDF.pdf"), 'rb')
 pdfReader = PyPDF2.PdfFileReader(book)
 pages = pdfReader.numPages
 print("This PDF has " + str(pages) + " number of pages.")
 
 # Initialize the converter 
-converter = pyttsx3.init('espeak') 
+converter = pyttsx3.init() 
 
 # Set properties before adding 
 # Things to say 
@@ -41,27 +41,26 @@ voices = converter.getProperty('voices')
 # Can be more than 100 
 converter.setProperty('rate', 200) 
 # Set volume 0-1 
-converter.setProperty('volume', 0.8) 
+converter.setProperty('volume', 0.3) 
 #Sets the voice to sound like whoever I want
-#converter.setProperty('voice', voices[2].id)
+converter.setProperty('voice', voices[10].id)
 
 # Queue the entered text 
 # There will be a pause between 
 # each one like a pause in 
 # a sentence
 
-#searchfor("John Doe")
+searchfor("Fiona")
 listnames(voices)
 ##    converter.setProperty('voice', voice.id)
 ##    converter.say("Hello, my guy. I am a bot programmed using some tutorial I found on the internet and some of the code was written by a 15-year-old. Are you older, then if you put your mind to it, you can also do the same")
 ##    converter.runAndWait()
     
-converter.say("Oi, Donkey. Get outta my swamp. I'm like an onion - I have layers")
+converter.say("Oi, Donkey. Get outta my swamp, ya fat bastard. I'm like an onion - I have layers")
 #This was my little joke when I set my voice to Scottish Fiona - voices[10].id
 
 converter.runAndWait()
-
-pagetoread = pdfReader.getPage(21)
+pagetoread = pdfReader.getPage(62)
 text = pagetoread.extractText()
 converter.say(text)
 #This can be used to read out an extract from a pdf

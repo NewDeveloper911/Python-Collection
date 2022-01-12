@@ -1,36 +1,31 @@
 from datetime import timedelta
-import os
 
 '''
 This file controls the variables for any configurations in Flask that I may want to use
 later on in the development of the website
 '''
-basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     DEBUG = False
     TESTING = False
 
-    SECRET_KEY = os.urandom(16)
+    SECRET_KEY = "2r9hf9bpihf9027"
+
     DB_NAME = "database"
     DB_USERNAME = "root"
     DB_PASSWORD = "password"
 
-    UPLOADS = r"D:\Programming\NEA\NEA project\Production"
+    UPLOADS = "/Users/mac/MacPython/Hacktoberfest2020/Python-Collection/flask_website/admin/static/Images"
 
     SESSION_COOKIE_SECURE = True #Cookies are transferred if connected to HTTPS 
 
-    SESSION_COOKIE_SAMESITE="Lax"
+    SESSION_COOKIE_SAMESITE="None"
 
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////C:\Users\Nana Yaw\Python-Collection\flask_website\admin\users.sqlite3'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///users.sqlite3'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     PERMANENT_SESSION_TIME = timedelta(hours=3)
-
-    WHOOSH_BASE = 'sqlite:////C:\Users\Nana Yaw\Python-Collection\flask_website\admin\users.sqlite3'
-
-    MAX_SEARCH_RESULTS = 50
 
 class ProductionConfig(Config):
     #Inherits all data and attributes of config class
@@ -44,7 +39,7 @@ class DevelopmentConfig(Config):
     DB_USERNAME = "todouser"
     DB_PASSWORD = "flask"
 
-    UPLOADS = r"D:\Programming\NEA\NEA project\Development"
+    UPLOADS = "/Users/mac/MacPython/Hacktoberfest2020/Python-Collection/flask_website/admin/templates"
 
 class TestingConfig(Config):
     TESTING = True
@@ -54,7 +49,7 @@ class TestingConfig(Config):
     DB_USERNAME = "example"
     DB_PASSWORD = "test"
 
-    UPLOADS = r"D:\Programming\NEA\NEA project\Testing"
+    UPLOADS = "/Users/mac/MacPython/Hacktoberfest2020/Python-Collection/flask_website/flaskenv/development"
 
     SESSION_COOKIE_SECURE = False
 
