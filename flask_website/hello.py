@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy #import at shell using: pip install flas
 #Need to deal with circular import from hello to flaskserver to databases to hell
 import logging
 from flask_migrate import Migrate
+from admin.databases import users
 
 
 @app.before_request
