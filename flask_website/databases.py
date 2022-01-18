@@ -15,6 +15,7 @@ class users(db.Model, UserMixin):
     password = db.Column(db.String(100))
     tasks = db.relationship('Todo', backref='post_author', lazy='dynamic')
     learn = db.relationship('Learning', backref='author', lazy='dynamic')
+    reply = db.relationship('Replies', backref='author', lazy='dynamic')
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
@@ -37,7 +38,7 @@ class users(db.Model, UserMixin):
         self.password = password
     
     def __repr__(self):
-        return '<Username: {0}, Email: {1}>'.format(self.name, self.email)
+        return '<Username: {0}, About me: {1}>'.format(self.name, self.about_me)
     pass
 
 #This database handles all tasks set per user
@@ -56,12 +57,45 @@ class Todo(db.Model):
 
     pass
 
+#Intermediate table between Learning posts and Tag table, to esnure 2NF
+tags = db.Table('tags',
+                db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
+                db.Column('post_id', db.Integer, db.ForeignKey('learning.id'), primary_key=True)
+                )
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('Learning.id'))
+
+    def __repr__(self):
+        return '<Tag name: {}>'.format(self.name)
+
 class Learning(db.Model):
     #__searchable__ = ['title', 'body']
     id = db.Column(db.Integer, primary_key=True)
     title= db.Column(db.String(300), nullable=False)
     body = db.Column(db.String(500), nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=func.now())
+    upvotes = db.Column(db.Integer, default=0)
+    downvotes = db.Column(db.Integer, default=0)
+    last_modified = db.Column(db.DateTime, index=True, default=func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    tags = db.relationship('Tag', secondary=tags, lazy='subquery',backref=db.backref('learning', lazy=True))
+    
+    def __repr__(self):
+        return '<Post title: {}>'.format(self.title)
+
+    pass
+
+class Replies(db.Model):
+    #__searchable__ = ['title', 'body']
+    id = db.Column(db.Integer, primary_key=True)
+    reply = db.Column(db.String(500), nullable=False)
+    timestamp = db.Column(db.DateTime, index=True, default=func.now())
+    upvotes = db.Column(db.Integer, default=0)
+    downvotes = db.Column(db.Integer, default=0)
+    last_modified = db.Column(db.DateTime, index=True, default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     
     def __repr__(self):

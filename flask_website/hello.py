@@ -27,7 +27,7 @@ elif app.config['ENV'] == "development":
 else:
     app.config.from_object("config.TestingConfig")
 
-app.register_blueprint(blueprint, url_prefix="/admin")
+app.register_blueprint(blueprint, url_prefix="/education")
 app.register_blueprint(todo, url_prefix="/todo")
 
 logging.basicConfig(level=logging.DEBUG)
@@ -68,7 +68,7 @@ def login():
             if check_password_hash(found_user.password, password):
                 session['user'] = found_user.name #creates new session for user
                 app.logger.info(str(session.get('user')) + " - Hooray, we are logged in.")
-                return redirect(url_for('user', detail=session.get('user'))) #redirects to user-only content
+                return redirect(url_for('user', detail=session.get('user'), user=users.query.filter_by(name=session.get('user')).first())) #redirects to user-only content
             flash('Incorrect password entered. Please try again', category='error')
         return redirect(url_for('login'))
     else:
@@ -85,28 +85,62 @@ def logout():
     
 @app.route("/user/<detail>", methods=['POST','GET'])
 def user(detail):
-    if request.method == "POST":
-        email = request.form["email"]
-        session["email"] = email
+        if request.method == "POST":
+             return redirect(url_for('edit_profile', detail=detail))
+        else:
+            if detail == session.get('user'): 
+                return render_template("flaskindex.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
+            else:
+                app.logger.info("Tried to skip the queue, huh? Your mistake.")
+                flash("You are not logged in yet, you should login in for full access to all features")
+                return redirect(url_for("login"))
 
+@app.route("/user/<detail>/edit_profile", methods=['POST','GET'])
+def edit_profile(detail):
+    if request.method == "POST":
         found_user = users.query.filter_by(name=str(detail)).first()
-        found_user.email = email
+        email = request.form.get("email")
+        if email:
+            session["email"] = email
+            found_user.email = email
+            flash("Email has been saved successfully")
+            app.logger.info("Your email, which is " + str(session.get('email')) + " has been saved successfully")
+
+        name = request.form.get('nm')
+        if name:
+            session["user"] = name
+            found_user.name = name
+            flash("Name has been saved successfully")
+            app.logger.info("Your name, which is " + str(users.query.filter_by(name=str(name)).first().name) + " has been saved successfully")
+
+        about_me = request.form.get('about_me')
+        if about_me:
+            found_user.about_me = about_me
+            flash("Your self-description has been saved successfully")
+            app.logger.info(users.query.filter_by(about_me=about_me).first().about_me)
+
+        p1 = request.form.get('password1')
+        p2 = request.form.get('password2')
+        if p1 and p2:
+            if p1 == p2:
+                found_user.password = p1
+                flash("Password has been saved successfully", category='info')
+                app.logger.info("Your password, which is " + str(users.query.filter_by(password=p1).first().name) + " has been saved successfully")
 
         db.session.commit()
-        flash("Email has been saved successfully")
-        app.logger.info("Your email, which is " + str(session.get('email')) + " has been saved successfully")
-        return render_template("flaskindex.html", user=str(detail))
+        
+        return render_template("flaskindex.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
     else:
         if "email" in session:
             email = session["email"]
             app.logger.info("Email has been set firmly")
-            return render_template("flaskindex.html", user=str(detail))
+            return render_template("flaskindex.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
         if detail:
-            return render_template("flaskindex.html", user=str(detail))
+            return render_template("flaskindex.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
         else:
             app.logger.info("Tried to skip the queue, huh? Your mistake.")
             flash("You are not logged in yet, you should login in for full access to all features")
-            return redirect(url_for("login"))           
+            return redirect(url_for("login"))
 
 @app.route("/signup", methods=['GET','POST'])
 def signup():
@@ -129,13 +163,21 @@ def signup():
             try:  
                 #session['user'] = users.query.filter_by(name=name).first().name
                 #Seem to be unable to search the database
-                return redirect(url_for('user', detail=name))
+                return redirect(url_for('user', detail=name, user=users.query.filter_by(name=name).first()))
             except:
                 app.logger.info("We have a problem, officer. {} is not bein put into the database".format(name))
                 app.logger.info(session.get('user'))
                 app.logger.info(users.query.all())
             
     return render_template('signup.html')
+
+@app.route('/delete/<user>')
+def delete(user):
+    #return "<h1>{}</h1>".format(id)
+    item = users.query.filter_by(name=user).first()
+    db.session.delete(item)
+    db.session.commit()
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
     db.create_all(app=app) #creates the database in case it doesn't already exist

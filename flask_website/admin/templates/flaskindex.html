@@ -1,5 +1,5 @@
 {%extends "base.html"%}
-{%block title%} Base page of Flask application{%endblock%}
+{%block title%} Home page{%endblock%}
 {%block style%}
 	<style>
 		*
@@ -37,7 +37,7 @@
 	</style>
 {%endblock%}
 {% block header %}
-<h1> Welcome, {{user}}, to my first ever functioning Flask application</h1>	
+<h1> Welcome back, {{user.name}}, to your profile page</h1>	
 {% endblock %}
 {%block content%}
 	{% with messages  = get_flashed_messages()%}
@@ -47,11 +47,17 @@
 			{% endfor %}
 		{% endif %}
 	{% endwith %}
-	<p>This website is the collection of my Flask skill taught to me by Tech With Tim. I am a  man of honour, so I like to give credit where it is due</p>
-	
-	<form action="#" method="POST">
-		<input style="width: 30%;" type="email" name="email" placeholder="Enter email" value="{{email if email}}"/>
-		<input type="submit" name="Submit" value="Submit" />
+
+	<h2> Would you like to ask a question?</h2>
+	<h4>Make sure to look at a couple of previous questions to make sure that your question hasn't already been answered</h4>
+	<form action="/education/contribute" method="POST">
+		<input style="width: 60%;" type="text" name="title" placeholder="What exactly is your question?"/>
+		<br>
+		<input style="width: 60%; height: auto;" type="text" name="body" placeholder="Be as descriptive about your question as possible. What exactly is not making sense to you? Use as many keywords as necessary to get what you want to know across." />
+		<br>
+		<input style="width: 60%;" type="text" name="tags" placeholder="Enter tags (separated by commas) which can help others in your situation find the question. Use examples such as subject, sub-topic, year and other keywords etc." />
+		<br>
+		<input class="btn btn-warning"type="submit" name="Submit" value="Ask a question" />
 	</form>
 	
 	{% if values%}
@@ -61,8 +67,35 @@
 		<p class="data1">Name: {{item.name}}</p>
 		<p class="data2">Email: {{item.email}}</p>
 	{% endfor %}
+
+	{% if posts%}
+		<h1>A table of all of the data held within the database</h1>
+	{% endif%}
+	{% for item in posts %}
+		<table>
+			<tr valign="top">
+				<td><img src="{{ item.author.avatar(128) }}"></td>
+				<td><h1>Question: {{ item.title }}</h1></td>
+				<td><h1>Details:</h1> <p>{{item.body}}</p></td>
+				<td><h1>Asked by: </h1> <p>{{item.author.name }} on {{item.timestamp.strftime("%c")}}</p></td>
+			</tr>
+		</table>
+	{% endfor %}
+
+	<table>
+        <tr valign="top">
+            <td><img src="{{ user.avatar(128) }}"></td>
+            <td><h1>User:</h1> <p>{{ user.name }}</p></td>
+			<td><h1>About me: </h1> <p>{{ user.about_me }}</p></td>
+        </tr>
+    </table>
+    <hr>
+
+	{%if request.method == 'POST'%}
+	<form action="/user/{{detail}}/edit_profile" method="POST">
+		<input type="submit" name="Submit" value="Edit details" />
+	</form>
+	{%endif%}
 	
 {%endblock%}
  
-{% block usr%}
-{%endblock%}

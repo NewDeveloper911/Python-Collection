@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session
 import sys
 import logging
 from flask_sqlalchemy import SQLAlchemy
@@ -9,13 +9,13 @@ todo = Blueprint("todo",  __name__, static_folder="admin.static", template_folde
 
 @todo.route('/')
 def todoindex():
-    todo_list = Todo.query.filter_by(complete=False).all() # Fetches all todos from my database
-    completed_todos = Todo.query.filter_by(complete=True).all() # Fectches all complete tasks
+    todo_list = Todo.query.filter_by(complete=False, author=session.get('user')).all() # Fetches all todos from my database
+    completed_todos = Todo.query.filter_by(complete=True, author=session.get('user')).all() # Fectches all complete tasks
     return render_template("todoindex.html", todo_list=todo_list, completed_todos=completed_todos)
 
 @todo.route('/add', methods=['GET','POST'])
 def addtask():
-    task = Todo(body=request.form['task'], complete=False)
+    task = Todo(body=request.form['task'], complete=False, author=session.get('user'))
     #Here, I search for an incomplete task which the user has set
     db.session.add(task)
     db.session.commit() #here, i add this task to my todo-list database

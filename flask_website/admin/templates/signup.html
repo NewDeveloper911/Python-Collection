@@ -38,10 +38,10 @@
 <h2>Sign up form</h2>
 
 <form method="POST">
-	<p><input type="text" name="nm" placeholder="Enter your username"/></p>
-	<p><input type="text" name="email" placeholder="Enter your email"/></p>
-	<p><input type="text" name="password1" placeholder="Enter password"/></p>
-	<p><input type="text" name="password2" placeholder="Confirm password"/></p>
+	<p><input type="text" minlength=1 name="nm" placeholder="Enter your username"/></p>
+	<p><input type="text" minlength=12 name="email" placeholder="Enter your email"/></p>
+	<p><input type="password" minlegth=1 name="password1" placeholder="Enter password"/></p>
+	<p><input type="password" minlegth=1 name="password2" placeholder="Confirm password"/></p>
 	<p><input type="submit" name="Submit" value="Submit" /></p>
 </form>
 
