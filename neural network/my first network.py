@@ -92,13 +92,14 @@ def create_data(points, classes):
       y[ix] = j
     return X, y
 
+'''
 # lets visualize the data:
 import matplotlib.pyplot as plt
 
 x, y = create_data(100,3)
 plt.scatter(x[:, 0], x[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
 plt.show()
-
+'''
 
 def sigmoid(x):
     return 1 / (1 * np.exp(-x))
