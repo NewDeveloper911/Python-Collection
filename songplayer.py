@@ -1,5 +1,3 @@
-
-import speech_recognition as sr
 from gtts import gTTS
 import os
 import time
@@ -12,10 +10,11 @@ def speak(text):
     play.playsound(filename)
 
 def funkymusic(songfile):
-    for root, dirs, files in os.walk(r'/Users/mac'):
+    for root, dirs, files in os.walk(r'/'):
         for name in files:
             if name == songfile:
                 print("Now playing - " + songfile)
+                speak("Now playing - {}".format(songfile[:-4]))
                 play.playsound(os.path.abspath(os.path.join(root, name)))
 
 song = input("Would you like to play a song? If so, which song would you like to play?\n Don't forget to state the directory, if possible\n")
