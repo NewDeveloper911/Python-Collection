@@ -5,8 +5,8 @@ import os
 
 # Credentials
 load_dotenv('.env')
-api_key = client.run(os.getenv('API_KEY'))
-channel = client.run(os.getenv('CHANNEL'))
+api_key = str(os.getenv('API_KEY'))
+channel = os.getenv('CHANNEL')
 startdate = datetime(year=2020, month=4, day=1).strftime('%Y-%m-%dT%H:%M:%SZ')
 enddate = datetime(year=2022, month=4, day=15).strftime('%Y-%m-%dT%H:%M:%SZ')
 
