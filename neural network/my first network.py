@@ -92,27 +92,28 @@ def create_data(points, classes):
       y[ix] = j
     return X, y
 
+'''
 # lets visualize the data:
 import matplotlib.pyplot as plt
 
 x, y = create_data(100,3)
 plt.scatter(x[:, 0], x[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
 plt.show()
-
+'''
 
 def sigmoid(x):
     return 1 / (1 * np.exp(-x))
 
-training_inouts = np.array([[0,0,1]
-                            [1,1,1]
-                            [1,0,1]
+training_inouts = np.array([[0,0,1],
+                            [1,1,1],
+                            [1,0,1],
                             [0,1,1]])
 
 training_outputs = np.array([[0,1,1,0]]).T 
 
 np.random.seed(1)
 
-synaptic_weights = np.random.random[(3,1)] - 1
+synaptic_weights = np.random.random((3,1)) - 1
 
 print("Random starting synaptic weights are\n")
 print(synaptic_weights)
