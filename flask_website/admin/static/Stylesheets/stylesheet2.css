@@ -148,3 +148,9 @@ li a.active {
       overflow: auto;
     padding: 10px;
   }
+
+  ::placeholder {
+    font-style: italic;
+    color: mintcream;
+    padding: 5px;
+}

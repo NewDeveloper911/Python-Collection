@@ -34,6 +34,12 @@
 			height: 50%;
 			width: 100%;
 		}
+
+		::placeholder {
+		font-style: italic;
+		color: mintcream;
+		padding: 5px;
+	}
 	</style>
 {%endblock%}
 {% block header %}
@@ -51,11 +57,11 @@
 	<h2> Would you like to ask a question?</h2>
 	<h4>Make sure to look at a couple of previous questions to make sure that your question hasn't already been answered</h4>
 	<form action="/education/contribute" method="POST">
-		<input style="width: 60%;" type="text" name="title" placeholder="What exactly is your question?"/>
+		<input style="width: 70%;" type="text" name="title" placeholder="What exactly is your question?"/>
 		<br>
-		<input style="width: 60%; height: auto;" type="text" name="body" placeholder="Be as descriptive about your question as possible. What exactly is not making sense to you? Use as many keywords as necessary to get what you want to know across." />
+		<input style="width: 70%; height: 10%;" type="text" name="body" placeholder="Be as descriptive about your question as possible. What exactly is not making sense to you? Use as many keywords as necessary to get what you want to know across." />
 		<br>
-		<input style="width: 60%;" type="text" name="tags" placeholder="Enter tags (separated by commas) which can help others in your situation find the question. Use examples such as subject, sub-topic, year and other keywords etc." />
+		<input style="width: 70%;" type="text" name="tags" placeholder="Enter tags (separated by commas) which can help others in your situation find the question. Use examples such as subject, sub-topic, year and other keywords etc." />
 		<br>
 		<input class="btn btn-warning"type="submit" name="Submit" value="Ask a question" />
 	</form>

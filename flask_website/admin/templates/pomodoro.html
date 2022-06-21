@@ -29,62 +29,78 @@
 			color: white;
 		}
 
-		.base-timer {
-		position: relative;
-		width: 300px;
-		height: 300px;
+		input{
+			margin: 1%;
 		}
+
+		.base-timer {
+			position: relative;
+			width: 300px;
+			height: 300px;
+			}
 
 		.base-timer__svg {
-		transform: scaleX(-1);
-		}
+			transform: scaleX(-1);
+			}
 
 		.base-timer__circle {
-		fill: none;
-		stroke: none;
-		}
+			fill: none;
+			stroke: none;
+			}
 
 		.base-timer__path-elapsed {
-		stroke-width: 7px;
-		stroke: grey;
-		}
+			stroke-width: 7px;
+			stroke: grey;
+			}
 
 		.base-timer__path-remaining {
-		stroke-width: 7px;
-		stroke-linecap: round;
-		transform: rotate(90deg);
-		transform-origin: center;
-		transition: 1s linear all;
-		fill-rule: nonzero;
-		stroke: currentColor;
-		}
+			stroke-width: 7px;
+			stroke-linecap: round;
+			transform: rotate(90deg);
+			transform-origin: center;
+			transition: 1s linear all;
+			fill-rule: nonzero;
+			stroke: currentColor;
+			}
 
 		.base-timer__path-remaining.green {
-		color: rgb(65, 184, 131);
-		}
+			color: rgb(65, 184, 131);
+			}
 
 		.base-timer__path-remaining.orange {
-		color: orange;
-		}
+			color: orange;
+			}
 
 		.base-timer__path-remaining.red {
-		color: red;
-		}
+			color: red;
+			}
 
 		.base-timer__label {
-		width: 5%;
-		height: 5%;
-		top: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 100%;
-		}
+			background: none;
+			position: absolute;
+			width: 300px;
+			height: 300px;
+			top: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 17px;
+			}
+
+			#pomodoro{
+				width: 30%;
+			}
+
+			::placeholder {
+				font-style: italic;
+				color: mintcream;
+				padding: 5px;
+			}
 
 	</style>
 {%endblock%}
 {% block header %}
-<h1> Welcome back, {{user.name}}, to your profile page</h1>	
+<h1> Why, hello there, {{user.name}}. Ready to get some work done today?</h1>	
 {% endblock %}
 {%block content%}
 	{% with messages  = get_flashed_messages()%}
@@ -96,12 +112,16 @@
 	{% endwith %}
 	
 	<div id="app"></div>
+	
 
 	<form action="/education/pomodoro" method='POST'>
-		<input type="text" name="pomodoro" id='pomodoro' placeholder="Enter the number of minutes per work-break cycle">
-		<input type="button" id="pause" class="btn btn-outline-warning" size="height:5%;width=45%" value="Start pomodoro timer"> <input type="reset" value="Reset"> 
+		<input type="text" name="pomodoro" id='pomodoro' placeholder="Enter the number of seconds per work-break cycle">
+		<br>
 		<input type="submit" value='Set cycle'> 
+		<input type="button" id="pause" class="btn btn-outline-warning" size="height:5%;width=45%" value="Start/Pause pomodoro timer" onclick="Pause()"> <input type="reset" value="Reset" onclick="onTimesUp()"> 		
 	</form>
+
+	<audio id="audio" src="mixkit-scanning-sci-fi-alarm-905.wav" type="audio/wav">
 
     <script>
 		const FULL_DASH_ARRAY = 283;
@@ -124,9 +144,11 @@
 
 		const TIME_LIMIT = parseInt('{{pomodoro}}');
 		let timePassed = 0;
+		let pause = false;
 		let timeLeft = TIME_LIMIT;
 		let timerInterval = null;
 		let remainingPathColor = COLOR_CODES.info.color;
+		var myAudio = document.getElementById('audio');
 
 		//w3.org link is blocked by my internet provider
 		document.getElementById("app").innerHTML = `
@@ -147,9 +169,7 @@
 			></path>
 			</g>
 		</svg>
-		<span id="base-timer-label" class="base-timer__label">${formatTime(
-			timeLeft
-		)}</span>
+		<span id="base-timer-label" class="base-timer__label">${formatTime(timeLeft)}</span>
 		</div>
 		`;
 
@@ -157,39 +177,66 @@
 
 		function onTimesUp() {
 		clearInterval(timerInterval);
+		timeLeft = 0;
+		setRemainingPathColor(timeLeft);
+		document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
+		}
+
+		function Pause()
+		{
+			pause = !pause;
 		}
 
 		function startTimer() {
 		timerInterval = setInterval(() => {
-			timePassed = timePassed += 1;
-			timeLeft = TIME_LIMIT - timePassed;
+			if (pause == false){
+				timePassed = timePassed += 1;
+				timeLeft = TIME_LIMIT - timePassed;
+			}
 			
-			document.getElementById("base-timer-label").innerHTML = formatTime(
-			timeLeft
-			);
+			document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
+			if (formatTime(timeLeft) != "Set a time cycle and get to work."){
+				document.getElementById("base-timer-label").style.fontSize = "xx-large";
+			}
+			else{
+				document.getElementById("base-timer-label").style.fontSize = "medium";
+			}
 			setCircleDasharray();
 			setRemainingPathColor(timeLeft);
 
-			if (timeLeft === 0) {
-			onTimesUp();
-			}
+			if (timeLeft === 0) { onTimesUp(); myAudio.play(); }
 		}, 1000);
 		}
 
 		function formatTime(time) {
+		const hours = Math.floor(time/3600);
 		const minutes = Math.floor(time / 60);
 		let seconds = time % 60;
+		seconds = parseInt(seconds);
 
-		if (seconds < 10) {
-			seconds = `0${seconds}`;
+		if (parseInt(seconds) < 60 && minutes === 0) {
+			return `00:00:${seconds}`;
 		}
-		if (seconds > 0 & minutes > 0)
+		if (seconds >= 0 & minutes >= 0)
 		{
-			return `${minutes}:${seconds}`;
+			if (minutes === 60){
+				var minutes_1 = `00`;
+			}
+			if (minutes < 10){
+				var minutes_1 = `0${minutes}`;
+			}
+			if (seconds < 10){
+				var seconds_1 = `0${seconds}`;
+			}
+			else{
+				var minutes_1 = minutes;
+				var seconds_1 = seconds;
+			}
+			return `${hours}:${minutes_1}:${seconds_1}`;
 		}
 		else
 		{
-			return "Set a time cycle for pomodoro, press 'Set cycle' and get to work.";
+			return `Set a time cycle and get to work.`;
 		}
 		
 		}

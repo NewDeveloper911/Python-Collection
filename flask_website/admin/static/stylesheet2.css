@@ -21,10 +21,16 @@ input
 	color: black;
 }
 
+::placeholder {
+	font-style: italic;
+	color: mintcream;
+	padding: 5px;
+}
+
 @media screen and (max-width: 600px) {
     li  {
       float: none;
       width: 50%;
 	}
 
-  
+}

@@ -59,14 +59,15 @@ class Todo(db.Model):
 
 #Intermediate table between Learning posts and Tag table, to esnure 2NF
 tags = db.Table('tags',
-                db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
+                db.Column('tag_id', db.Integer, db.ForeignKey('tags.id'), primary_key=True),
                 db.Column('post_id', db.Integer, db.ForeignKey('learning.id'), primary_key=True)
                 )
 
 class Tag(db.Model):
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('Learning.id'))
+    post_id = db.Column(db.Integer,db.ForeignKey('Learning.id'), primary_key=True)
 
     def __repr__(self):
         return '<Tag name: {}>'.format(self.name)
