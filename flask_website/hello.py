@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy #import at shell using: pip install flas
 from admin.flaskserver import todo
 import logging
 from flask_migrate import Migrate
-from databases import db, users #This allows me to access databases in other files
+from databases import db, users, Learning #This allows me to access databases in other files
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)

@@ -35,6 +35,11 @@
 			width: 100%;
 		}
 
+		#post{
+			height:20%;
+			width:20%;
+		}
+
 		::placeholder {
 		font-style: italic;
 		color: mintcream;
@@ -54,40 +59,31 @@
 		{% endif %}
 	{% endwith %}
 
-	<h2> Would you like to ask a question?</h2>
-	<h4>Make sure to look at a couple of previous questions to make sure that your question hasn't already been answered</h4>
-	<form action="/education/contribute" method="POST">
-		<input style="width: 70%;" type="text" name="title" placeholder="What exactly is your question?"/>
-		<br>
-		<input style="width: 70%; height: 10%;" type="text" name="body" placeholder="Be as descriptive about your question as possible. What exactly is not making sense to you? Use as many keywords as necessary to get what you want to know across." />
-		<br>
-		<input style="width: 70%;" type="text" name="tags" placeholder="Enter tags (separated by commas) which can help others in your situation find the question. Use examples such as subject, sub-topic, year and other keywords etc." />
-		<br>
-		<input class="btn btn-warning"type="submit" name="Submit" value="Ask a question" />
-	</form>
-	
-	{% if values%}
-		<h1>A table of all of the data held within the database</h1>
-	{% endif%}
-	{% for item in values %}
-		<p class="data1">Name: {{item.name}}</p>
-		<p class="data2">Email: {{item.email}}</p>
-	{% endfor %}
+	{%if request.path == "/education/home"%}
+		<h2> Would you like to ask a question?</h2>
+		<h4>Make sure to look at a couple of previous questions to make sure that your question hasn't already been answered</h4>
+		<form action="/education/contribute" method="POST">
+			<input style="width: 70%;" type="text" name="title" placeholder="What exactly is your question?"/>
+			<br>
+			<input style="width: 70%; height: 10%;" type="text" name="body" placeholder="Be as descriptive about your question as possible. What exactly is not making sense to you? Use as many keywords as necessary to get what you want to know across." />
+			<br>
+			<input style="width: 70%;" type="text" name="tags" placeholder="Enter tags (separated by commas) which can help others in your situation find the question. Use examples such as subject, sub-topic, year and other keywords etc." />
+			<br>
+			<input class="btn btn-warning"type="submit" name="Submit" value="Ask a question" />
+		</form>
+	{%endif%}
 
-	{% if posts%}
-		<h1>A table of all of the data held within the database</h1>
-	{% endif%}
+
 	{% for item in posts %}
-		<table>
-			<tr valign="top">
-				<td><img src="{{ item.author.avatar(128) }}"></td>
-				<td><h1>Question: {{ item.title }}</h1></td>
-				<td><h1>Details:</h1> <p>{{item.body}}</p></td>
-				<td><h1>Asked by: </h1> <p>{{item.author.name }} on {{item.timestamp.strftime("%c")}}</p></td>
-			</tr>
-		</table>
+	<img id="post"style="float:left;" src="{{ item.question_author.avatar(128) }}">
+		<h1>Question: {{ item.title }}</h1>
+		<p><b>Details:</b> {{item.body}}</p>
+		<p><b>Asked by:</b> {{item.question_author.name }} on {{item.timestamp.strftime("%c")}}</p>
+
 	{% endfor %}
 
+	{% if not posts%}
+	<br><br>
 	<table>
         <tr valign="top">
             <td><img src="{{ user.avatar(128) }}"></td>
@@ -96,12 +92,18 @@
         </tr>
     </table>
     <hr>
-
-	{%if request.method == 'POST'%}
+	{%if "edit_profile" in request.path%}
 	<form action="/user/{{detail}}/edit_profile" method="POST">
+		<p><input type="text" minlength=1 name="nm" placeholder="Enter your username"/></p>
+		<p><input type="text" minlength=12 name="email" placeholder="Enter your email"/></p>
+		<p><input type="password" minlegth=1 name="password1" placeholder="Enter password"/></p>
+		<p><input type="password" minlegth=1 name="password2" placeholder="Confirm password"/></p>
 		<input type="submit" name="Submit" value="Edit details" />
 	</form>
 	{%endif%}
+	{%endif%}
+
+
 	
 {%endblock%}
  

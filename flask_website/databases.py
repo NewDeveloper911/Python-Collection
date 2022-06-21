@@ -14,8 +14,8 @@ class users(db.Model, UserMixin):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     tasks = db.relationship('Todo', backref='post_author', lazy='dynamic')
-    learn = db.relationship('Learning', backref='author', lazy='dynamic')
-    reply = db.relationship('Replies', backref='author', lazy='dynamic')
+    learn = db.relationship('Learning', backref='question_author', lazy='dynamic')
+    reply = db.relationship('Replies', backref='comment_author', lazy='dynamic')
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
@@ -57,17 +57,21 @@ class Todo(db.Model):
 
     pass
 
-#Intermediate table between Learning posts and Tag table, to esnure 2NF
-tags = db.Table('tags',
-                db.Column('tag_id', db.Integer, db.ForeignKey('tags.id'), primary_key=True),
-                db.Column('post_id', db.Integer, db.ForeignKey('learning.id'), primary_key=True)
-                )
+'''
+#Intermediate table between Learning posts and Tag table, to ensure 2NF
+'''
+association_table = db.Table(
+    'association',
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
+    db.Column('learning_id', db.Integer, db.ForeignKey('learning.id'))
+)
 
 class Tag(db.Model):
     __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     name = db.Column(db.String(50), nullable=False)
-    post_id = db.Column(db.Integer,db.ForeignKey('Learning.id'), primary_key=True)
+    post_id = db.Column(db.Integer,db.ForeignKey('learning.id'), primary_key=True)
+    author = db.relationship('Learning',secondary=association_table,backref='post_tags')
 
     def __repr__(self):
         return '<Tag name: {}>'.format(self.name)
@@ -82,22 +86,33 @@ class Learning(db.Model):
     downvotes = db.Column(db.Integer, default=0)
     last_modified = db.Column(db.DateTime, index=True, default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    tags = db.relationship('Tag', secondary=tags, lazy='subquery',backref=db.backref('learning', lazy=True))
+    replies = db.relationship('Replies', backref='post')
     
     def __repr__(self):
         return '<Post title: {}>'.format(self.title)
 
     pass
 
+'''
+#Intermediate table between Learning posts and Replies table, to ensure 2NF
+'''
+comment_table = db.Table(
+    'comment',
+    db.Column('reply_id', db.Integer, db.ForeignKey('replies.id')),
+    db.Column('learning_id', db.Integer, db.ForeignKey('learning.id'))
+)
+
 class Replies(db.Model):
     #__searchable__ = ['title', 'body']
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     reply = db.Column(db.String(500), nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=func.now())
     upvotes = db.Column(db.Integer, default=0)
     downvotes = db.Column(db.Integer, default=0)
     last_modified = db.Column(db.DateTime, index=True, default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer,db.ForeignKey('learning.id'), primary_key=True)
+    author = db.relationship('Learning',secondary=comment_table,backref='post_replies')
     
     def __repr__(self):
         return '<Post title: {}>'.format(self.title)
