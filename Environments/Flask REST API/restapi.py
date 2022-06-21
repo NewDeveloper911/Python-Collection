@@ -64,6 +64,7 @@ resource_fields = {
 
 
 class Video(Resource):
+    #Can fetch information from the database
     @marshal_with(resource_fields)
     def get(self, video_id):
         #represent get method
@@ -83,6 +84,7 @@ class Video(Resource):
     and outputted as suitable strings, instead of creating an instance of the
     database
     '''
+    #Allows me to add a new video to the database
     @marshal_with(resource_fields)
     def put(self, video_id):
         #represent put method
@@ -100,6 +102,7 @@ class Video(Resource):
         return video, 201
         # code says that this has been created successfully
 
+    #Updates values on a video - change name, views and likes
     @marshal_with(resource_fields)
     def patch(self, video_id):
         #represents patch method
@@ -122,8 +125,10 @@ class Video(Resource):
     def delete(self, video_id):
         #represents delete method
         #abort_if_not(video_id)
-        del videos[video_id]
-        return '', 204
+        video = VideoModel.query.filter_by(id=video_id).first()
+        db.session.delete(video)
+        db.session.commit()
+        return 'Mission successful', 204
         #status code 209 means something has been deleted successfully
     
 api.add_resource(Video, "/video/<int:video_id>")

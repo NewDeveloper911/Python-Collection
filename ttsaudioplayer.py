@@ -6,8 +6,10 @@ import os
 import json
 
 def search(filename):
-    for root, dirs, files in os.walk(r'/Users/mac'):
+    for root, dirs, files in os.walk(r'/'):
         for name in files:
+            if ".pdf" in name:
+                print(name)
             if name == filename:
                 print("The file named: " + filename + " has been successfully located")
                 return os.path.abspath(os.path.join(root, name))
@@ -24,7 +26,7 @@ def searchfor(voicename):
         else:
             continue
         
-book = open(search("OfMiceAndMen PDF.pdf"), 'rb')
+book = open(search(input("What kind of book do you wish to read?")), 'rb')
 pdfReader = PyPDF2.PdfFileReader(book)
 pages = pdfReader.numPages
 print("This PDF has " + str(pages) + " number of pages.")
@@ -43,7 +45,7 @@ converter.setProperty('rate', 200)
 # Set volume 0-1 
 converter.setProperty('volume', 0.3) 
 #Sets the voice to sound like whoever I want
-converter.setProperty('voice', voices[10].id)
+converter.setProperty('voice', voices[1].id)
 
 # Queue the entered text 
 # There will be a pause between 
@@ -52,12 +54,6 @@ converter.setProperty('voice', voices[10].id)
 
 searchfor("Fiona")
 listnames(voices)
-##    converter.setProperty('voice', voice.id)
-##    converter.say("Hello, my guy. I am a bot programmed using some tutorial I found on the internet and some of the code was written by a 15-year-old. Are you older, then if you put your mind to it, you can also do the same")
-##    converter.runAndWait()
-    
-converter.say("Oi, Donkey. Get outta my swamp, ya fat bastard. I'm like an onion - I have layers")
-#This was my little joke when I set my voice to Scottish Fiona - voices[10].id
 
 converter.runAndWait()
 pagetoread = pdfReader.getPage(62)
