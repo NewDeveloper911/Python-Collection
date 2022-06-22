@@ -11,29 +11,31 @@ Here, I have just told my program of the locations of my static (unchanging file
 @blueprint.route("/") 
 def home():
     Posts = Learning.query.limit(5) # Fetches all todos from my database
-    return render_template("flaskindex.html", posts=Posts)
+    return render_template("flaskindex.html", posts=Posts, user=session.get('user'))
 
 @blueprint.route("/contribute", methods=['POST','GET'])
 def contribute():
     if request.method == 'POST':
         title=request.form.get('title')
+        body=request.form.get('body')
         if not title or len(title) < 12:
             flash("Please ensure that you have entered a question of a reasonable length", category='warning')
-        body=request.form.get('body')
-        if not body or len(body) < 12:
+        elif not body or len(body) < 12:
             flash("Please ensure that you have entered enough details about your question (subject, sub-topic etc) of a reasonable length", category='warning')
-        new_post = Learning(title=title, body=body, timestamp=datetime.datetime.now())
-        db.session.add(new_post)
-        db.session.commit()
+        else:
+            new_post = Learning(title=title, body=body, timestamp=datetime.datetime.now(),question_author=users.query.filter_by(name=session.get('user')).first())
+            db.session.add(new_post)
+            db.session.commit()
+            flash("Post submitted successfully", category='message')
 
         tags=request.form.get('tags').split(', ')
         for i in tags:
-            new_tag = Tag(name=i, post_id=new_post.id)
+            new_tag = Tag(name=i)
             db.session.add(new_tag)
             db.session.commit()
 
-        flash("Post submitted successfully", category='message')
-    return render_template("flaskindex.html", detail=str(session.get('user')), user=users.query.filter_by(name=session.get('user')).first(), posts=Learning.query.filter(db.Learning.upvotes>db.Learning.downvotes).order_by(db.Learning.upvotes-db.Learning.downvotes).limit(10))
+        
+    return render_template("flaskindex.html", detail=str(session.get('user')), user=users.query.filter_by(name=session.get('user')).first(), posts=Learning.query.filter(Learning.upvotes>Learning.downvotes).order_by(Learning.upvotes-Learning.downvotes).limit(10))
 
 @blueprint.route("/edit_post/<int:id>", methods=['POST','GET'])
 def edit_post(detail):
