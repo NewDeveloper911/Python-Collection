@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint, redirect, url_for, render_template,request, session, flash, current_app
-from databases import db, Learning, Tag, users #This allows me to access databases in other files
+from databases import db, Learning, Tag, users, Replies #This allows me to access databases in other files
 import datetime
 
 blueprint = Blueprint("blueprint",  __name__, static_folder="static", template_folder="templates")
@@ -38,6 +38,20 @@ def contribute():
     #return render_template("flaskindex.html", detail=str(session.get('user')), user=users.query.filter_by(name=session.get('user')).first(), posts=Learning.query.filter(Learning.upvotes>Learning.downvotes).order_by(Learning.upvotes-Learning.downvotes).limit(10))
     return render_template("flaskindex.html", detail=str(session.get('user')), user=users.query.filter_by(name=session.get('user')).first(), posts=Learning.query.limit(10))
 
+@blueprint.route("/answer", methods=['POST','GET'])
+def answer():
+    if request.method == 'POST':
+        body=request.form.get('reply_text')
+        if not body or len(body) < 12:
+            flash("Please ensure that you have entered enough details about your answer of a reasonable length", category='warning')
+        else:
+            answer = Replies(reply=body,comment_author=users.query.filter_by(name=session.get('user')).first())
+            db.session.add(answer)
+            db.session.commit()
+            flash("Answer submitted successfully", category='message')
+
+    return render_template("flaskindex.html", detail=str(session.get('user')), user=users.query.filter_by(name=session.get('user')).first(), posts=Learning.query.limit(10))
+
 @blueprint.route("/edit_post/<int:id>", methods=['POST','GET'])
 def edit_post(detail):
     if request.method == "POST":
@@ -73,6 +87,38 @@ def edit_post(detail):
             current_app.logger.info("Tried to skip the queue, huh? Your mistake.")
             flash("You are not logged in yet, you should login in for full access to all features")
             return redirect(url_for("login"))
+
+@blueprint.route('/upvote/<id>')
+def upvote(id):
+    #return "<h1>{}</h1>".format(id)
+    item = Learning.query.filter_by(id=int(id)).first()
+    item.upvotes +=1
+    db.session.commit()
+    return redirect(url_for("education.home"))
+
+@blueprint.route('/downvote/<id>')
+def downvote(id):
+    #return "<h1>{}</h1>".format(id)
+    item = Learning.query.filter_by(id=int(id)).first()
+    item.downvotes +=1
+    db.session.commit()
+    return redirect(url_for("education.home"))
+
+@blueprint.route('/upvote_post/<id>')
+def upvote(id):
+    #return "<h1>{}</h1>".format(id)
+    item = Replies.query.filter_by(id=int(id)).first()
+    item.upvotes +=1
+    db.session.commit()
+    return redirect(url_for("education.home"))
+
+@blueprint.route('/downvote_post/<id>')
+def downvote(id):
+    #return "<h1>{}</h1>".format(id)
+    item = Replies.query.filter_by(id=int(id)).first()
+    item.downvotes +=1
+    db.session.commit()
+    return redirect(url_for("education.home"))
 
 @blueprint.route("/pomodoro", methods=['GET','POST'])
 def pomodoro():
