@@ -11,7 +11,7 @@ Here, I have just told my program of the locations of my static (unchanging file
 @blueprint.route("/") 
 def home():
     Posts = Learning.query.limit(5) # Fetches all todos from my database
-    return render_template("flaskindex.html", posts=Posts, user=session.get('user'))
+    return render_template("flaskindex.html", posts=Posts, user=users.query.filter_by(name=session.get('user')).first())
 
 @blueprint.route("/contribute", methods=['POST','GET'])
 def contribute():
@@ -34,8 +34,9 @@ def contribute():
             db.session.add(new_tag)
             db.session.commit()
 
-        
-    return render_template("flaskindex.html", detail=str(session.get('user')), user=users.query.filter_by(name=session.get('user')).first(), posts=Learning.query.filter(Learning.upvotes>Learning.downvotes).order_by(Learning.upvotes-Learning.downvotes).limit(10))
+    #Save until I actually implement upvotes and downvotes
+    #return render_template("flaskindex.html", detail=str(session.get('user')), user=users.query.filter_by(name=session.get('user')).first(), posts=Learning.query.filter(Learning.upvotes>Learning.downvotes).order_by(Learning.upvotes-Learning.downvotes).limit(10))
+    return render_template("flaskindex.html", detail=str(session.get('user')), user=users.query.filter_by(name=session.get('user')).first(), posts=Learning.query.limit(10))
 
 @blueprint.route("/edit_post/<int:id>", methods=['POST','GET'])
 def edit_post(detail):

@@ -131,7 +131,7 @@
 <h2>Here, you can edit the details of your profile</h2>
 <p>You do not have to enter new details for all of the sections, just the ones which you wish to edit</p>
 
-<form action="/user/{{detail}}" method="POST">
+<form action="/user/{{detail}}/edit_profile" method="POST">
     <input style="width: 30%;" type="text" name="nm" placeholder="Enter your username" value="{{name if name}}"/>
     <input style="width: 30%; height: auto;" type="text" name="about_me" placeholder="Describe your account. What do you study/teach? Any topics you can help others out on and topics you need help on?" value="{{name if name}}"/>
     <input style="width: 30%;" type="email" name="email" placeholder="Enter email" value="{{email if email}}"/>
