@@ -88,13 +88,25 @@
 			}
 
 			#pomodoro{
-				width: 30%;
+				width: 40%;
 			}
 
 			::placeholder {
 				font-style: italic;
 				color: mintcream;
 				padding: 5px;
+			}
+
+			.main-container {
+				float: left;
+				position: relative;
+				left: 50%;
+				}
+
+			.fixer-container {
+			float: left;
+			position: relative;
+			left: -50%;
 			}
 
 	</style>
@@ -111,17 +123,28 @@
 		{% endif %}
 	{% endwith %}
 	
-	<div id="app"></div>
-	
+	<div class="main-container">
+		<div class="fixer-container">
+			<div id="app"></div>
+			<form action="/education/pomodoro" method='POST'>
+				<label>Select how many minutes you want to work for:
+					<input list="browsers" name="pomodoro"/></label>
+					<datalist id="browsers">
+					<option value="30">
+					<option value="60">
+					<option value="90">
+					<option value="120">
+					<option value="150">
+					<option value="180">
+					</datalist>
+				<br>
+				<input type="submit" value='Set cycle'> 
+				<input type="button" id="pause" class="btn btn-outline-warning" size="height:5%;width=45%" value="Start/Pause pomodoro timer" onclick="Pause()"> <input type="reset" value="Reset" onclick="onTimesUp()"> 		
+			</form>
+		</div>
+	</div>
 
-	<form action="/education/pomodoro" method='POST'>
-		<input type="text" name="pomodoro" id='pomodoro' placeholder="Enter the number of seconds per work-break cycle">
-		<br>
-		<input type="submit" value='Set cycle'> 
-		<input type="button" id="pause" class="btn btn-outline-warning" size="height:5%;width=45%" value="Start/Pause pomodoro timer" onclick="Pause()"> <input type="reset" value="Reset" onclick="onTimesUp()"> 		
-	</form>
-
-	<audio id="audio" src="mixkit-scanning-sci-fi-alarm-905.wav" type="audio/wav"> </audio>
+	<audio id="audio" src="static/mixkit-scanning-sci-fi-alarm-905.wav" type="audio/wav"> </audio>
 
     <script>
 		const FULL_DASH_ARRAY = 283;
@@ -142,10 +165,12 @@
 		}
 		};
 
-		const TIME_LIMIT = parseInt('{{pomodoro}}');
+		const TIME_LIMIT = 60*parseInt('{{pomodoro}}');
 		let timePassed = 0;
 		let pause = false;
 		let timeLeft = TIME_LIMIT;
+		let breakTime = false;
+		let currentTime = timeLeft;
 		let timerInterval = null;
 		let remainingPathColor = COLOR_CODES.info.color;
 		var myAudio = document.getElementById('audio');
@@ -176,10 +201,15 @@
 		startTimer();
 
 		function onTimesUp() {
-		clearInterval(timerInterval);
-		timeLeft = 0;
-		setRemainingPathColor(timeLeft);
-		document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
+			clearInterval(timerInterval);
+			timeLeft = 0;
+			setRemainingPathColor(timeLeft);
+			document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
+			if (breakTime === true){
+				timeLeft = currentTime;
+				breakTime = false;
+			}
+		
 		}
 
 		function Pause()
@@ -192,6 +222,11 @@
 			if (pause == false){
 				timePassed = timePassed += 1;
 				timeLeft = TIME_LIMIT - timePassed;
+			}
+			else if(timeLeft %1500){
+				breakTime = true;
+				currentTime = timeLeft;
+				timeLeft = 300;
 			}
 			
 			document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);

@@ -76,10 +76,36 @@
 
 	{% for item in posts %}
 	<img id="post"style="float:left;" src="{{ item.question_author.avatar(128) }}">
+	<a id="post" style="float:right;" href="{{url_for('education.upvote', id=item.id)}}" class="btn btn-success">Upvote</a>
+	<a id="post" style="float:right;" href="{{url_for('education.downvote', id=item.id)}}" class="btn btn-danger">Downvote</a>
 		<h1>Question: {{ item.title }}</h1>
 		<p><b>Details:</b> {{item.body}}</p>
 		<p><b>Asked by:</b> {{item.question_author.name }} on {{item.timestamp.strftime("%c")}}</p>
+		{%if item.question_author == user%}
+		<h3>If you ever wish to edit your post:</h3>
+		<form method="POST" action="/education/edit_post/{{item.id}}">
+			<input style="width: 70%;" type="text" name="title" placeholder="What exactly is your question?"/>
+			<br>
+			<input style="width: 70%; height: 10%;" type="text" name="body" placeholder="Be as descriptive about your question as possible. What exactly is not making sense to you? Use as many keywords as necessary to get what you want to know across." />
+			<br>
+			<input style="width: 70%;" type="text" name="tags" placeholder="Enter tags (separated by commas) which can help others in your situation find the question. Use examples such as subject, sub-topic, year and other keywords etc." />
+			<br>
+			<input class="btn btn-warning"type="submit" name="Submit" value="Ask a question" />
+		</form>
+		{%endif%}
 
+		<form method="POST" action="/education/answer">
+			<input type="text" name="reply_text" placeholder="Wish to answer this question? Feel free to answer.">
+			<input type="submit" name="Submit" value="Answer">
+		</form>
+		{for reply in item.replies}
+			<!-- Make a similar upvote and downvote system using the Replies database-->
+			<img id="post"style="float:left;" src="{{ reply.comment_author.avatar(128) }}">
+			<a id="post" style="float:right;" href="{{url_for('education.upvote_post', id=reply.id)}}" class="btn btn-success">Upvote {{reply.upvotes}}</a>
+			<a id="post" style="float:right;" href="{{url_for('education.downvote_post', id=reply.id)}}" class="btn btn-danger">Downvote {{reply.downvotes}}</a>
+			<p class="data1"><b>Answered by:</b> {{reply.comment_author.name }} on {{reply.timestamp.strftime("%c")}}</p>
+			<p class="data2"><b>Detailed answer:</b> {{reply.body}}</p>
+		{%endfor%}
 	{% endfor %}
 
 	{% if not posts%}
@@ -92,15 +118,6 @@
         </tr>
     </table>
     <hr>
-	{%if "edit_profile" in request.path%}
-	<form action="/user/{{detail}}/edit_profile" method="POST">
-		<p><input type="text" minlength=1 name="nm" placeholder="Enter your username"/></p>
-		<p><input type="text" minlength=12 name="email" placeholder="Enter your email"/></p>
-		<p><input type="password" minlegth=1 name="password1" placeholder="Enter password"/></p>
-		<p><input type="password" minlegth=1 name="password2" placeholder="Confirm password"/></p>
-		<input type="submit" name="Submit" value="Edit details" />
-	</form>
-	{%endif%}
 	{%endif%}
 
 

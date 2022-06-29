@@ -85,15 +85,12 @@ def logout():
     
 @app.route("/user/<detail>", methods=['POST','GET'])
 def user(detail):
-        if request.method == "POST":
-             return redirect(url_for('edit_profile', detail=detail))
-        else:
-            if detail == session.get('user'): 
-                return render_template("flaskindex.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
-            else:
-                app.logger.info("Tried to skip the queue, huh? Your mistake.")
-                flash("You are not logged in yet, you should login in for full access to all features")
-                return redirect(url_for("login"))
+    if detail == session.get('user'): 
+        return render_template("flaskindex.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
+    else:
+        app.logger.info("Tried to skip the queue, huh? Your mistake.")
+        flash("You are not logged in yet, you should login in for full access to all features")
+        return redirect(url_for("login"))
 
 @app.route("/user/<detail>/edit_profile", methods=['POST','GET'])
 def edit_profile(detail):
@@ -123,20 +120,18 @@ def edit_profile(detail):
         p2 = request.form.get('password2')
         if p1 and p2:
             if p1 == p2:
-                found_user.password = p1
+                found_user.password = generate_password_hash(p1, "pbkdf2:sha512")
                 flash("Password has been saved successfully", category='info')
-                app.logger.info("Your password, which is " + str(users.query.filter_by(password=p1).first().name) + " has been saved successfully")
 
         db.session.commit()
+        session['user'] = users.query.filter_by(name=str(name)).first().name
+        session['email'] = users.query.filter_by(name=str(name)).first().email
+        detail = session['user']
         
         return render_template("flaskindex.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
     else:
-        if "email" in session:
-            email = session["email"]
-            app.logger.info("Email has been set firmly")
-            return render_template("flaskindex.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
         if detail:
-            return render_template("flaskindex.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
+            return render_template("edit_details.html", detail=str(detail), user=users.query.filter_by(name=detail).first())
         else:
             app.logger.info("Tried to skip the queue, huh? Your mistake.")
             flash("You are not logged in yet, you should login in for full access to all features")
