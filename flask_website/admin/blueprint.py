@@ -122,8 +122,4 @@ def post_downvote(id):
 
 @blueprint.route("/pomodoro", methods=['GET','POST'])
 def pomodoro():
-    if request.method == 'POST':
-        pomodoro = request.form.get('pomodoro')
-        return render_template("pomodoro.html", detail=str(session['user']), user=users.query.filter_by(name=session['user']).first(), pomodoro=pomodoro)
-    else:
-         return render_template("pomodoro.html", detail=str(session['user']), user=users.query.filter_by(name=session['user']).first())
+    return render_template("pomodoro.html", detail=str(session['user']), user=users.query.filter_by(name=session['user']).first())

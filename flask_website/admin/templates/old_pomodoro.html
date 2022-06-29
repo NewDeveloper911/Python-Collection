@@ -143,9 +143,7 @@
 			 -->
 			<form action="/education/pomodoro" method='POST'>
 				
-				<input type="button" id="start" class="btn btn-success" size="height:5%;width=45%" value="Start" onclick="Start()">
-				<input type="button" id="pause" class="btn btn-outline-warning" size="height:5%;width=45%" value="Pause" onclick="Pause()">
-				<input type="reset" value="Reset" onclick="onTimesUp()"> 		
+				<input type="button" id="pause" class="btn btn-outline-warning" size="height:5%;width=45%" value="Start/Pause pomodoro timer" onclick="Pause()"> <input type="reset" value="Reset" onclick="onTimesUp()"> 		
 			</form>
 		</div>
 	</div>
@@ -206,39 +204,55 @@
 		</div>
 		`;
 
-		function Start(){
-			reps = reps + 1;
-			if (reps % 8 === 0){
-				document.getElementById("title_text").innerHTML = "Break";
-				document.getElementById("base-timer-label").innerHTML =formatTime(LONG_BREAK_SEC);
-				myAudio.play()
-			}
-			else if(reps % 2 === 0){
-				document.getElementById("title_text").innerHTML = "Break";
-				document.getElementById("base-timer-label").innerHTML =formatTime(SHORT_BREAK_SEC);
-				myAudio.play()
-			}
-			else{
-				document.getElementById("title_text").innerHTML = "Work time";
-				document.getElementById("base-timer-label").innerHTML =formatTime(WORK_SEC);
-				myAudio.play()
-			}
-		}
+		startTimer();
 
 		function Reset(){
 			onTimesUp();
 			reps = 0;
 		}
 
-		function Pause(){
+		function onTimesUp() {
+			clearInterval(timerInterval);
+			timeLeft = 0;
+			setRemainingPathColor(timeLeft);
+			document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
+		
+		}
+
+		function Pause()
+		{
 			pause = !pause;
-			let Pausebutton = document.getElementById('audio');
-			if (pause === true){
-				Pausebutton.innerHTML = "Continue";
+		}
+
+		function startTimer() {
+		timerInterval = setInterval(() => {
+			if (pause == false){
+				timePassed = timePassed += 1;
+				timeLeft = TIME_LIMIT - timePassed;
+			}
+
+			if (reps % 8 === 0){
+				document.getElementById("title_text").innerHTML = "Break";
+			}
+			else if(reps % 2 === 0){
+				document.getElementById("title_text").innerHTML = "Break";
 			}
 			else{
-				Pausebutton.innerHTML = "Pause";
+				document.getElementById("title_text").innerHTML = "Work time";
 			}
+			
+			document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
+			if (formatTime(timeLeft) != "Set a time cycle and get to work."){
+				document.getElementById("base-timer-label").style.fontSize = "xx-large";
+			}
+			else{
+				document.getElementById("base-timer-label").style.fontSize = "medium";
+			}
+			setCircleDasharray();
+			setRemainingPathColor(timeLeft);
+
+			if (timeLeft === 0) { onTimesUp(); myAudio.play();}
+		}, 1000);
 		}
 
 		function formatTime(time) {
@@ -246,53 +260,32 @@
 		const minutes = Math.floor(time / 60);
 		let seconds = time % 60;
 		seconds = parseInt(seconds);
-		if(seconds>0){
-			if (parseInt(seconds) < 60 && minutes === 0) {
-				return `00:00:${seconds}`;
-			}
-			if (seconds >= 0 & minutes >= 0)
-			{
-				if (minutes === 60){
-					var minutes_1 = `00`;
-				}
-				if (minutes < 10){
-					var minutes_1 = `0${minutes}`;
-				}
-				if (seconds < 10){
-					var seconds_1 = `0${seconds}`;
-				}
-				else{
-					var minutes_1 = minutes;
-					var seconds_1 = seconds;
-				}
-				return `${hours}:${minutes_1}:${seconds_1}`;
-			}
 
-			document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
-			if (formatTime(timeLeft) != "00:00:00"){
-				document.getElementById("base-timer-label").style.fontSize = "xx-large";
+		if (parseInt(seconds) < 60 && minutes === 0) {
+			return `00:00:${seconds}`;
+		}
+		if (seconds >= 0 & minutes >= 0)
+		{
+			if (minutes === 60){
+				var minutes_1 = `00`;
+			}
+			if (minutes < 10){
+				var minutes_1 = `0${minutes}`;
+			}
+			if (seconds < 10){
+				var seconds_1 = `0${seconds}`;
 			}
 			else{
-				document.getElementById("base-timer-label").style.fontSize = "medium";
+				var minutes_1 = minutes;
+				var seconds_1 = seconds;
 			}
-
-			setCircleDasharray();
-			setRemainingPathColor(timeLeft);
-			if (pause === false){
-				setTimeOut(formatTime(time-1),1000);
-			}
-			
-			
+			return `${hours}:${minutes_1}:${seconds_1}`;
 		}
-		else{
-			Start();
-			//Add the functionality to show a bunch of tasks to complete
-			work_sessions = Math.floor(reps/2);
-			for(let i=0;i>work_sessions;i++){
-				//Add another tick to the tasks to complete with pomodoro
-				//Display the completed tasks so far - ✔
-			}
+		else
+		{
+			return `Set a time cycle and get to work.`;
 		}
+		
 		}
 
 		function setRemainingPathColor(timeLeft) {
