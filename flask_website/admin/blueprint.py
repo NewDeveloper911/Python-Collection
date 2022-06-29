@@ -105,7 +105,7 @@ def downvote(id):
     return redirect(url_for("education.home"))
 
 @blueprint.route('/upvote_post/<id>')
-def upvote(id):
+def post_upvote(id):
     #return "<h1>{}</h1>".format(id)
     item = Replies.query.filter_by(id=int(id)).first()
     item.upvotes +=1
@@ -113,7 +113,7 @@ def upvote(id):
     return redirect(url_for("education.home"))
 
 @blueprint.route('/downvote_post/<id>')
-def downvote(id):
+def post_downvote(id):
     #return "<h1>{}</h1>".format(id)
     item = Replies.query.filter_by(id=int(id)).first()
     item.downvotes +=1

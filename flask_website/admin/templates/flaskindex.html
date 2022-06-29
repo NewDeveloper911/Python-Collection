@@ -98,7 +98,7 @@
 			<input type="text" name="reply_text" placeholder="Wish to answer this question? Feel free to answer.">
 			<input type="submit" name="Submit" value="Answer">
 		</form>
-		{for reply in item.replies}
+		{%for reply in item.replies%}
 			<!-- Make a similar upvote and downvote system using the Replies database-->
 			<img id="post"style="float:left;" src="{{ reply.comment_author.avatar(128) }}">
 			<a id="post" style="float:right;" href="{{url_for('education.upvote_post', id=reply.id)}}" class="btn btn-success">Upvote {{reply.upvotes}}</a>
@@ -106,7 +106,7 @@
 			<p class="data1"><b>Answered by:</b> {{reply.comment_author.name }} on {{reply.timestamp.strftime("%c")}}</p>
 			<p class="data2"><b>Detailed answer:</b> {{reply.body}}</p>
 		{%endfor%}
-	{% endfor %}
+	{%endfor%}
 
 	{% if not posts%}
 	<br><br>
@@ -119,8 +119,5 @@
     </table>
     <hr>
 	{%endif%}
-
-
-	
 {%endblock%}
  
