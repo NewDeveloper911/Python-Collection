@@ -21,7 +21,7 @@ class Neural_Network:
             self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=neurons,activation_function=activation_function))
         outputs = int(input("How many outputs do you wish to have in your neural network?\n"))
         inputs = self._network[-1].get_neurons()
-        self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=outputs,activation_function=activation_function))
+        self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=outputs,activation_function="relu"))
 
     def structure(self):
         structure = []
@@ -50,7 +50,7 @@ class GetStuff():
 class Layer_Dense:
     def __init__(self, **kwargs):
         self._neurons = kwargs['no_neurons']
-        self._activation_function = kwargs['activation_function']
+        self._activation_function = kwargs.get('activation_function')
         #Original line which works with normal array
         self.weights = np.random.randn(kwargs['no_inputs'], self._neurons)
 
@@ -69,16 +69,22 @@ class Layer_Dense:
             self.output.append([])
             for neuron_output in layer_output:
                 #trigger the activation function
+
                 if self._activation_function.lower() == 'relu':
                     neuron_output = np.maximum(0,neuron_output)
                 elif self._activation_function.lower() == 'sigmoid':
                     neuron_output = 1 / (1 + np.exp(-neuron_output))
                 self.output[-1].append(neuron_output)
 
+
 #First, I'll need to fetch the inputs from a pre-processed dataset which I've created earlier
 input_directory = GetStuff().get_directory("dataset.csv")
 data = pd.read_csv(input_directory, engine="python")
 network_inputs = data
+
+#Then, fetch the data with the values that I'm meant to be predicting
+target_directory = GetStuff().get_directory("starting_data.csv")
+target_values = pd.read_csv(target_directory, engine="python")
 
 #I'm currently creating a neural network with an input layer and 3 hidden layers
 neural = Neural_Network(inputs=network_inputs, no_layers=4)
