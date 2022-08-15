@@ -1,0 +1,90 @@
+import numpy as np
+import os
+import pandas as pd
+
+class Neural_Network:
+    def __init__(self,**kwargs):
+        self._network = []
+        self._inputs = kwargs['inputs']
+        activation_function = input("Which activation function do you wish to use?\n")
+        for i in range(kwargs['no_layers']):
+            if i == 0:
+                #Don't use len() for dataframes in Pandas
+                #Instead, aim to get the length of the first row and assume the others are of same length
+                #Best solution I can think of right now
+                inputs = len(self._inputs)
+            else:
+                inputs = self._network[-1].get_neurons()
+            neurons = int(input("How many neurons do you want in layer #" + str(i+1) + "?\n"))
+            self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=neurons,activation_function=activation_function))
+        outputs = int(input("How many outputs do you wish to have in your neural network?\n"))
+        inputs = self._network[-1].get_neurons()
+        self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=outputs,activation_function=activation_function))
+
+    def structure(self):
+        structure = []
+        for layer in self._network:
+            structure.append(layer.get_neurons())
+        print("The structure of this neural network is:", structure)
+
+    def run(self):
+        #Start by putting initial inputs into the input layer
+        self._network[0].forward(self._inputs)
+        for i in range(len(self._network)-1):
+            #Using the previous layer's outputs as the next layer's inputs
+            self._network[i+1].forward(self._network[i].output)
+        print("The network's outputs were:", self._network[-1].output) 
+
+class GetStuff():
+    def __init__(cls):
+        pass
+
+    def get_directory(cls,file_name):
+        for root, dirs, files in os.walk(r'/'):
+            for name in files:
+                if name == file_name:
+                    return os.path.abspath(os.path.join(root, name))
+
+class Layer_Dense:
+    def __init__(self, **kwargs):
+        self._neurons = kwargs['no_neurons']
+        self._activation_function = kwargs['activation_function']
+        #Original line which works with normal array
+        #self.weights = np.random.randn(kwargs['no_inputs'], self._neurons)
+
+        #New line to use to experiment with using a Pandas DataFrame
+        #Same as before but with dimensions swapped to see if changing the dimensions would fix the issue
+        self.weights = np.random.randn(self._neurons,kwargs['no_inputs'])
+
+        #Biases are a 1D array, so 1 list of a length of the number of neurons
+        self.biases = np.zeros((1, self._neurons))
+
+    def get_neurons(self):
+        return self._neurons
+
+    def forward(self, inputs):
+        #OUtput unaffected by the activation function prior to any extra bedazzle
+        self._ideal_output = np.dot(inputs, self.weights) + self.biases
+        #OUtput affected by the activation function
+        self.output = []
+        for layer_output in self._ideal_output:
+            self.output.append([])
+            for neuron_output in layer_output:
+                #trigger the activation function
+                if self._activation_function.lower() == 'relu':
+                    neuron_output = np.maximum(0,neuron_output)
+                elif self._activation_function.lower() == 'sigmoid':
+                    neuron_output = 1 / (1 + np.exp(-neuron_output))
+                self.output[-1].append(neuron_output)
+
+#First, I'll need to fetch the inputs from a pre-processed dataset which I've created earlier
+input_directory = GetStuff().get_directory("dataset.csv")
+data = pd.read_csv(input_directory, engine="python")
+print(data)
+network_inputs = data
+
+#I'm currently creating a neural network with an input layer and 3 hidden layers
+neural = Neural_Network(inputs=network_inputs, no_layers=4)
+#Prints the structure of the network
+neural.structure()
+neural.run()
