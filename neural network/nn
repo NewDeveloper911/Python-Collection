@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import pandas as pd
+import csv
 
 class Neural_Network:
     def __init__(self,**kwargs):
@@ -9,10 +10,11 @@ class Neural_Network:
         activation_function = input("Which activation function do you wish to use?\n")
         for i in range(kwargs['no_layers']):
             if i == 0:
-                #Don't use len() for dataframes in Pandas
-                #Instead, aim to get the length of the first row and assume the others are of same length
-                #Best solution I can think of right now
-                inputs = len(self._inputs)
+                try:
+                    #For datasets only
+                    inputs=len(self._inputs.columns.values)
+                except:
+                    inputs = len(self._inputs)
             else:
                 inputs = self._network[-1].get_neurons()
             neurons = int(input("How many neurons do you want in layer #" + str(i+1) + "?\n"))
@@ -50,11 +52,7 @@ class Layer_Dense:
         self._neurons = kwargs['no_neurons']
         self._activation_function = kwargs['activation_function']
         #Original line which works with normal array
-        #self.weights = np.random.randn(kwargs['no_inputs'], self._neurons)
-
-        #New line to use to experiment with using a Pandas DataFrame
-        #Same as before but with dimensions swapped to see if changing the dimensions would fix the issue
-        self.weights = np.random.randn(self._neurons,kwargs['no_inputs'])
+        self.weights = np.random.randn(kwargs['no_inputs'], self._neurons)
 
         #Biases are a 1D array, so 1 list of a length of the number of neurons
         self.biases = np.zeros((1, self._neurons))
@@ -80,7 +78,6 @@ class Layer_Dense:
 #First, I'll need to fetch the inputs from a pre-processed dataset which I've created earlier
 input_directory = GetStuff().get_directory("dataset.csv")
 data = pd.read_csv(input_directory, engine="python")
-print(data)
 network_inputs = data
 
 #I'm currently creating a neural network with an input layer and 3 hidden layers
