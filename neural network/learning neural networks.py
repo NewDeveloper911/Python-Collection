@@ -1,15 +1,19 @@
 import numpy as np
 import nnfs
+from nnfs.datasets import spiral_data
 
 nnfs.init()
 
 #These will represent neurons in my input(first true) layer of neurons
 #To prevent shape errors the number of inputs per batch must equal the number of neurons (1D arrays in the weights matrix
-#Inputs and training data sets are denoted by X apparently in machine learning
-#Each 1D contains the number of inputs per round and the matrix of arrays store the size of the batch (how many times we pass in inputs)
-X = [[1,0.2,0.3,0.5],
-     [0.2,0.5,-1.0,0.2],
-     [-1,0.7,0.3,-0.8]]
+
+def sigmoid(x):
+    return 1 / (1 * np.exp(-x))
+
+def softmax(x):
+    exp_values = np.exp(x - np.max(x,axis=1,keepdims=True))
+    return exp_values / np.sum(exp_values,axis=1,keepdims=True)
+
 ''' 
 #Each input have a weight. These below are the input of 3 neurons
 weights = [[1,0.4,0.8,1],
@@ -57,6 +61,10 @@ class Activation_ReLU:
     def forward(self, inputs):
        self.output = np.maximum(0,inputs)
 
+class Activation_Softmax:
+    def forward(self, inputs):
+        self.output = softmax(inputs)
+
 class Layer_Dense:
     def __init__(self, n_inputs, n_neurons):
         #Multiplying by 0.1 ensures that all values produced are lower than 1 and greater than -1
@@ -69,40 +77,25 @@ class Layer_Dense:
     def forward(self, inputs):
         self.output = np.dot(inputs, self.weights) + self.biases
 
+X,y = spiral_data(samples=100, classes=3)
+
 #For this, the first number is the number of values in each 1D array in the matrix of training data, so here 4
 #Second number can be whatever we want
-layer1 = Layer_Dense(4,6)
+layer1 = Layer_Dense(2,6)
+activation1 = Activation_ReLU()
 #Here, the number of inputs must be the same as the number of neurons in the previous layer
-layer2 = Layer_Dense(6,2)
+layer2 = Layer_Dense(6,3)
+activation2 = Activation_Softmax()
 
 #Output will show the outputs from each individual neuron in arrays, and show them in batches of results shown by the 1D array count in the matrix
 layer1.forward(X)
+activation1.forward(layer1.output)
 #print("This is the first output from Layer1,\n", layer1.output)
-layer2.forward(layer1.output)
-print("This is the final output of this model neural network,\n", layer2.output)
+layer2.forward(activation1.output)
+activation2.forward(layer2.output)
+#print("This is the final output of this model neural network,\n", layer2.output)
 
-def sigmoid(x):
-    return 1 / (1 * np.exp(-x))
-
-training_inouts = np.array([[0,0,1],
-                            [1,1,1],
-                            [1,0,1],
-                            [0,1,1]])
-
-training_outputs = np.array([[0,1,1,0]]).T 
-
-np.random.seed(1)
-
-synaptic_weights = np.random.random((3,1)) - 1
-
-print("Random starting synaptic weights are\n")
-print(synaptic_weights)
-
-for iteration in range(1):
-
-    input_layer = training_inouts
-
-    outputs = sigmoid(np.dot(input_layer, synaptic_weights))
-
-print("Outputs: ")
-print(outputs)
+print(activation2.output[:5])
+#Normalisation is the process of dividing each value by the total sum of values given to produce 
+#the probability values associated with neural networks
+#This is how we can get percentage accuracy with neural networks
