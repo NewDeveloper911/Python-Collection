@@ -59,8 +59,7 @@ class Neural_Network:
 
             for i in range(len(self._network)-1,-1):
                 error = self._network[i-1].backward(error, self._learning_rate)
-
-            print('Epoch %d/%d  Loss=%f' % (i+1, epochs, loss))
+                print('Epoch %d/%d' % (i+1, epochs))
 
         #Start by putting initial inputs into the input layer
         self._network[0].forward(self._testing_data)
@@ -73,10 +72,11 @@ class Neural_Network:
         #Split the available dataset into training data and testing data
         split = float(input("Enter a decimal between 0 and 1 to represent the fraction of data to be used for training:\n"))
         assert split >= 0 and split <=1
-        data_split = round(split * len(self._inputs.columns.values))
-        training_data = self._inputs.iloc[:data_split]
+        data_split = round(split * len(self._inputs))
+        training_data = self._inputs.iloc[0:data_split]
         testing_data = self._inputs.iloc[data_split:]
         self._inputs = training_data
+        #At time of editing, this data set is empty. Why?
         self._testing_data = testing_data
 
     def evaluate(self):
@@ -109,10 +109,10 @@ class Neural_Network:
         #If one-hot encoding has not been passed in
         if len(self._target_values.shape) == 1:
             #Selecting the largest confidences based on their position
-            correct_confidences = y_pred_clipped[range(samples),self._target_values]
+            correct_confidences = y_pred_clipped[range(samples),self._target_values[:samples]]
         elif len(self._target_values.shape) == 2:
             #One-hot encoding has been used in this scenario
-            correct_confidences = np.sum(y_pred_clipped*self._target_values, axis=1)
+            correct_confidences = np.sum(y_pred_clipped*self._target_values[:samples], axis=1)
 
         #Calculate the loss and return
         loss = -np.log(correct_confidences)
@@ -156,11 +156,12 @@ class Layer_Dense:
                     neuron_output = np.maximum(0,neuron_output)
                 elif self._activation_function.lower() == 'sigmoid':
                     neuron_output = 1 / (1 + np.exp(-neuron_output))
+                #These section of code needs to be sorted out pronto - It seems to be adding another dimension to the data
                 elif self._activation_function.lower() == 'softmax':
                     #Exponentiate (e to the power of x) values and subtract largest value of layer to prevent overflow
                     #Afterwards, normalise (put as relative fractions) the output values
-                    #In theory, to get the max value out of each batch, axis should be set to 1
-                    neuron_output = np.exp(neuron_output - np.max(layer_output,axis=0,keepdims=True)) / np.sum(np.exp(layer_output),axis=0,keepdims=True)
+                    #In theory, to get the max value out of each batch, axis should be set to 1 and keepdims should be True
+                    neuron_output = np.exp(neuron_output - np.max(layer_output,axis=0)) / np.sum(np.exp(layer_output),axis=0)
                 self.output[-1].append(neuron_output)
 
     #Taken from above but used to prevent overaddition of data to the network outputs
