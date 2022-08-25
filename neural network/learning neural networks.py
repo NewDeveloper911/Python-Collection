@@ -1,3 +1,4 @@
+from abc import ABC
 import numpy as np
 import nnfs
 from nnfs.datasets import spiral_data
@@ -65,6 +66,28 @@ class Activation_Softmax:
     def forward(self, inputs):
         self.output = softmax(inputs)
 
+class Loss(ABC):
+    def calculate(self, output, y):
+        sample_losses = self.forward(output, y)
+        data_loss = np.mean(sample_losses)
+        return data_loss
+    
+class CCrossEntropy(Loss):
+    def forward(self, y_pred, y_actual):
+        samples = len(y_pred)
+        #Clip the values so we don't get any infinity errors if a confidence level happens to be spot on
+        y_pred_clipped = np.clip(y_pred, 1e-7, 1-1e-7)
+
+        #If one-hot encoding has not been passed in
+        if len(y_actual.shape) == 1:
+            correct_confidences = y_pred_clipped[range(samples),y_actual]
+        elif len(y_actual.shape) == 2:
+            #One-hot encoding has been used in this scenario
+            correct_confidences = np.sum(y_pred_clipped*y_actual, axis=1)
+
+        #Calculate the loss and return
+        loss = -np.log(correct_confidences)
+        return loss
 class Layer_Dense:
     def __init__(self, n_inputs, n_neurons):
         #Multiplying by 0.1 ensures that all values produced are lower than 1 and greater than -1
@@ -95,7 +118,22 @@ layer2.forward(activation1.output)
 activation2.forward(layer2.output)
 #print("This is the final output of this model neural network,\n", layer2.output)
 
-print(activation2.output[:5])
+print(activation2.output[0])
 #Normalisation is the process of dividing each value by the total sum of values given to produce 
 #the probability values associated with neural networks
 #This is how we can get percentage accuracy with neural networks
+
+#Using one-hot encoding to calculate the categorical cross-entropy of data (loss)
+#In one-hot encoding, we assign the target class position we want in our array of outputs
+#Then make an array of 0s of the same length as outputs but put a 1 in the target class position
+#This basically simplifies to just the negative natural logarithm of the predicted target value
+loss_function = CCrossEntropy()
+loss = loss_function.calculate(activation2.output, y)
+print("Loss:",loss)
+
+"""
+Do not ever forget this amazing website with the answers or the corresponding video:
+https://towardsdatascience.com/math-neural-network-from-scratch-in-python-d6da9f29ce65
+https://www.youtube.com/watch?v=pauPCy_s0Ok&t=1565s
+"""
+
