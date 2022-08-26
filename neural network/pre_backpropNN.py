@@ -8,6 +8,8 @@ class Neural_Network:
         self._inputs = kwargs['inputs']
         self._testing_data = None
         self._target_values = kwargs['targets']
+        self._learning_rate = kwargs['learning_rate']
+        self._output_percentages = []
 
         activation_function = input("Which activation function do you wish to use?\n")
         for i in range(kwargs['no_layers']):
@@ -22,8 +24,9 @@ class Neural_Network:
             neurons = int(input("How many neurons do you want in layer #" + str(i+1) + "?\n"))
             self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=neurons,activation_function=activation_function))
         outputs = int(input("How many outputs do you wish to have in your neural network?\n"))
+        output_activation = input("Which activation function do you wish to use for the output function?\n")
         inputs = self._network[-1].get_neurons()
-        self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=outputs,activation_function=activation_function))
+        self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=outputs,activation_function=output_activation))
 
     def structure(self):
         structure = []
@@ -31,6 +34,7 @@ class Neural_Network:
             structure.append(layer.get_neurons())
         print("The structure of this neural network is:", structure)
     def run(self):
+        #Training phase
         #Start by putting initial inputs into the input layer
         self._network[0].forward(self._inputs)
         for i in range(len(self._network)-1):
@@ -38,12 +42,21 @@ class Neural_Network:
             self._network[i+1].forward(self._network[i].output)
         print("The network's outputs were:", self._network[-1].output)
 
+        #Evaluation needed for backpropagation
+
+        #Testing phase
+        self._network[0].forward(self._testing_data)
+        for i in range(len(self._network)-1):
+            #Using the previous layer's outputs as the next layer's inputs
+            self._network[i+1].forward(self._network[i].output)
+        print("The network's testing outputs were:", self._network[-1].output)
+
     def train_test_split(self):
         #Split the available dataset into training data and testing data
-        split = float(input("Enter a decimal between 0 and 1 to represent the fraction of data to be used for testing:\n"))
+        split = float(input("Enter a decimal between 0 and 1 to represent the fraction of data to be used for training:\n"))
         assert split >= 0 and split <=1
-        data_split = round(split * len(self._inputs.columns.values))
-        training_data = self._inputs.iloc[:data_split]
+        data_split = round(split * len(self._inputs))
+        training_data = self._inputs.iloc[0:data_split]
         testing_data = self._inputs.iloc[data_split:]
         self._inputs = training_data
         self._testing_data = testing_data
@@ -99,6 +112,7 @@ class Layer_Dense:
                     neuron_output = np.maximum(0,neuron_output)
                 elif self._activation_function.lower() == 'sigmoid':
                     neuron_output = 1 / (1 + np.exp(-neuron_output))
+                #Try to figure out how to implement softmax function
                 self.output[-1].append(neuron_output)
 
   

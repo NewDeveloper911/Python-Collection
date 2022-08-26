@@ -85,9 +85,11 @@ class CCrossEntropy(Loss):
             #One-hot encoding has been used in this scenario
             correct_confidences = np.sum(y_pred_clipped*y_actual, axis=1)
 
+        print(-np.log(y_pred[[0,1,2]]))
         #Calculate the loss and return
         loss = -np.log(correct_confidences)
         return loss
+
 class Layer_Dense:
     def __init__(self, n_inputs, n_neurons):
         #Multiplying by 0.1 ensures that all values produced are lower than 1 and greater than -1
@@ -135,5 +137,54 @@ print("Loss:",loss)
 Do not ever forget this amazing website with the answers or the corresponding video:
 https://towardsdatascience.com/math-neural-network-from-scratch-in-python-d6da9f29ce65
 https://www.youtube.com/watch?v=pauPCy_s0Ok&t=1565s
+
+Videos 2 & 3 from:
+https://www.youtube.com/watch?v=09c7bkxpv9I&list=PL5foUFuneQnonBeWB3LlLV7UKHC8D_XWr
+https://www.youtube.com/watch?v=znqbtL0fRA0&list=PL5foUFuneQnonBeWB3LlLV7UKHC8D_XWr
 """
 
+#Calculating the partial derivative of softmax
+# = delta softmax(output[j]) / delta output[i] = softmax_derivative
+"""
+def get_softmax_derivative(i,j):
+    if i == j:
+        softmax_derivative = softmax(output[i] * (1-softmax(output[i])))
+    else:
+        softmax_derivative = -softmax(output[i]) * softmax(output[j])
+    return softmax_derivative
+"""
+
+#Save the backprop function from website
+"""
+   def backward(self, output_error, learning_rate):
+        #The error of this layer's inputs is equal to its output error multipled by the 
+        #transposed weights of the layer
+        input_error = np.dot(output_error, self.weights.T)
+        #The error of the weights in this layer is equal to the transposed matrix of inputs fed into the layer
+        #multipled by the error of the output from this layer
+        weights_error = np.dot(self.inputs.T, output_error)
+        # dBias = output_error
+
+        # update parameters
+        self.weights -= learning_rate * weights_error
+        self.biases -= learning_rate * output_error
+        return input_error
+"""
+
+#Derivative of cost function with respect to weights
+#Namely, what impact does changing the weight have on the overall cost function
+"""
+for neuron in range(len(layer_output)):
+    cost_derivative = np.sum(layer_output[neuron-1])*softmax_derivative(,np.sum(layer_output[neuron-1]))
+"""
+
+#trying to create a backpropagation algorithm for categorical cross-entropy from scratch failed attempt
+#Slap into the run() function below line 50
+"""
+loss_deriv_list = []
+                for o in range(len(self._network[-1].output)):
+                    #Using a bucktonne of calculus to simplify the derivative of loss with respect to each neuron
+                    #Basically what impact does the inputs of an output neuron sway the final predictions of the network
+                    loss_derivative = GetStuff().get_softmax(self._network[-1].output[o],self._network[-1].output) - self._target_values[o]
+                    loss_deriv_list.append(loss_derivative)
+"""
