@@ -12,7 +12,7 @@ def speak(text):
 def funkymusic(songfile):
     for root, dirs, files in os.walk(r'/'):
         for name in files:
-            if name == songfile:
+            if name in songfile:
                 print("Now playing - " + songfile)
                 speak("Now playing - {}".format(songfile[:-4]))
                 play.playsound(os.path.abspath(os.path.join(root, name)))

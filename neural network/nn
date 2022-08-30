@@ -90,8 +90,6 @@ class Neural_Network:
         loss = -np.log(correct_confidences)
         return loss
 
-
-
 class GetStuff():
     def __init__(cls):
         pass
