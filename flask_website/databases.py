@@ -78,7 +78,7 @@ class Tag(db.Model):
 
 class Learning(db.Model):
     #__searchable__ = ['title', 'body']
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     title= db.Column(db.String(300), nullable=False)
     body = db.Column(db.String(500), nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=func.now())

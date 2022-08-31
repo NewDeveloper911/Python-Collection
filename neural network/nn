@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import pandas as pd
-import csv
 
 class Neural_Network:
     def __init__(self,**kwargs):
@@ -9,6 +8,8 @@ class Neural_Network:
         self._inputs = kwargs['inputs']
         self._testing_data = None
         self._target_values = kwargs['targets']
+        self._learning_rate = kwargs['learning_rate']
+        self._output_percentages = []
 
         activation_function = input("Which activation function do you wish to use?\n")
         for i in range(kwargs['no_layers']):
@@ -24,7 +25,7 @@ class Neural_Network:
             self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=neurons,activation_function=activation_function))
         outputs = int(input("How many outputs do you wish to have in your neural network?\n"))
         inputs = self._network[-1].get_neurons()
-        self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=outputs,activation_function=activation_function))
+        self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=outputs,activation_function="softmax"))
 
     def structure(self):
         structure = []
@@ -32,45 +33,62 @@ class Neural_Network:
             structure.append(layer.get_neurons())
         print("The structure of this neural network is:", structure)
 
-    def run(self):
+    def run(self, **kwargs):
+        epochs = kwargs['epochs']
+        for i in range(epochs):
+            #Forward pass
+            self._network[0].forward(self._inputs)
+            for i in range(len(self._network)-1):
+                #Using the previous layer's outputs as the next layer's inputs
+                self._network[i+1].forward(self._network[i].output)
+
+            #Generates the values for loss function, used for training in multiple passes
+            #Backbone of backpropagation
+            loss = neural.calculate_loss()
+            total_error = np.sum(loss)
+            error = loss
+
+            for i in range(len(self._network)-1,-1):
+                #Run the actual backward pass of backpropagation
+                error = self._network[i-1].backward(error, self._learning_rate)
+
+                print(f'Epoch {0}/{1} Loss: {2}'.format(i+1, epochs,np.sum(error) / len(error)))
+
         #Start by putting initial inputs into the input layer
-        self._network[0].forward(self._inputs)
+        self._network[0].forward(self._testing_data)
         for i in range(len(self._network)-1):
             #Using the previous layer's outputs as the next layer's inputs
             self._network[i+1].forward(self._network[i].output)
-        print("The network's outputs were:", self._network[-1].output)
+        print("The network's testing outputs were:", self._network[-1].output)
 
     def train_test_split(self):
         #Split the available dataset into training data and testing data
-        split = float(input("Enter a decimal between 0 and 1 to represent the fraction of data to be used for testing:\n"))
+        split = float(input("Enter a decimal between 0 and 1 to represent the fraction of data to be used for training:\n"))
         assert split >= 0 and split <=1
-        data_split = round(split * len(self._inputs.columns.values))
-        training_data = self._inputs.iloc[:data_split]
+        data_split = round(split * len(self._inputs))
+        training_data = self._inputs.iloc[0:data_split]
         testing_data = self._inputs.iloc[data_split:]
         self._inputs = training_data
         self._testing_data = testing_data
 
-    def evaluate(self):
-        final_outputs = self._network[-1].output
-        total_age_error = 0.0
-        total_gender_error = 0.0
-        total_politic_error = 0.0
-        for i in len(final_outputs):
-            #Figure out a way to get the final outputs  unaffected by the activation function or I affect the 
-            #target values with the same activation function
-            gender = final_outputs[i][0]
-            political_affiliations = final_outputs[i][1]
-            age = final_outputs[i][2]
-
-            target_gender = self._target_values.iloc[i][0]
-            target_political_affiliations = self._target_values.iloc[i][1]
-            target_age = float(self._target_values.iloc[i][2])
-
-            age_error = abs(target_age - age)
-            politic_error = abs(target_political_affiliations-political_affiliations)
-            gender_error = abs(target_gender-gender)
-
-
+    def calculate_loss(self):
+        #Target values are the y values that we want to be predicting correctly
+        #Cross entropy = -y1*np.log(softmax(final_neuron_output))
+        #calculate each time for each of the final neurons
+        samples = len(self._network[-1].output)
+        #Clip the values so we don't get any infinity errors if a confidence level happens to be spot on
+        y_pred_clipped = np.clip(self._network[-1].output, 1e-7, 1-1e-7)
+        #If one-hot encoding has not been passed in
+        if len(self._target_values.shape) == 1:
+            #Selecting the largest confidences based on their position
+            correct_confidences = y_pred_clipped[range(samples),self._target_values[:len(self._inputs)]]
+        elif len(self._target_values.shape) == 2:
+            #One-hot encoding has been used in this scenario
+            correct_confidences = np.sum(y_pred_clipped*self._target_values[:len(self._inputs)], axis=1)
+        #Calculate the loss and return
+        #Due to one-hot encoding, we can ignore the error of the incorrect classes when calculating the total error
+        loss = -np.log(correct_confidences)
+        return loss
 
 class GetStuff():
     def __init__(cls):
@@ -81,6 +99,21 @@ class GetStuff():
             for name in files:
                 if name == file_name:
                     return os.path.abspath(os.path.join(root, name))
+
+    def get_softmax(cls, neuron, layer):
+        return np.exp(neuron - np.max(layer)) / np.sum(np.exp(layer))
+
+    def get_softmax_derivative(cls,output_layer,i,j):
+        #output_layer is basically the softmax output layer's values
+        #i represents the index of the neuron's output we are trying to get the derivative of
+        #Basically i is the output of the neuron
+        #j represents of the index of which we are trying to get the derivative of i with respect to j
+        #Basically j is the input of the neuron, so this function will require iterated values of j
+        if i == j:
+            softmax_derivative = cls.get_softmax(output_layer[i] * (1-cls.get_softmax(output_layer[i])))
+        else:
+            softmax_derivative = -cls.get_softmax(output_layer[i]) * cls.get_softmax(output_layer[j])
+        return softmax_derivative
 
 class Layer_Dense:
     def __init__(self, **kwargs):
@@ -96,6 +129,7 @@ class Layer_Dense:
         return self._neurons
 
     def forward(self, inputs):
+        self.inputs = inputs
         #OUtput unaffected by the activation function prior to any extra bedazzle
         self._ideal_output = np.dot(inputs, self.weights) + self.biases
         #OUtput affected by the activation function
@@ -109,8 +143,26 @@ class Layer_Dense:
                     neuron_output = np.maximum(0,neuron_output)
                 elif self._activation_function.lower() == 'sigmoid':
                     neuron_output = 1 / (1 + np.exp(-neuron_output))
+                #These section of code needs to be sorted out pronto - It seems to be adding another dimension to the data
+                elif self._activation_function.lower() == 'softmax':
+                    #Exponentiate (e to the power of x) values and maybe subtract largest value of layer to prevent overflow
+                    #Afterwards, normalise (put as relative fractions) the output values
+                    neuron_output = GetStuff().get_softmax(neuron_output,layer_output)
                 self.output[-1].append(neuron_output)
 
+    def backward(self, output_error, learning_rate):
+            #The error of this layer's inputs is equal to its output error multipled by the 
+            #transposed weights of the layer
+            input_error = np.dot(output_error, self.weights.T)
+            #The error of the weights in this layer is equal to the transposed matrix of inputs fed into the layer
+            #multipled by the error of the output from this layer
+            weights_error = np.dot(self.inputs.T, output_error)
+            # dBias = output_error
+
+            # update parameters
+            self.weights -= learning_rate * weights_error
+            self.biases -= learning_rate * output_error
+            return input_error
 
 #First, I'll need to fetch the inputs from a pre-processed dataset which I've created earlier
 input_directory = GetStuff().get_directory("dataset.csv")
@@ -122,8 +174,8 @@ target_directory = GetStuff().get_directory("starting_data.csv")
 target_values = pd.read_csv(target_directory, engine="python")
 
 #I'm currently creating a neural network with an input layer and 3 hidden layers
-neural = Neural_Network(inputs=network_inputs, no_layers=4, targets=target_values)
+neural = Neural_Network(inputs=network_inputs, learning_rate=1.3, no_layers=4, targets=target_values['gender'])
 #Prints the structure of the network
 neural.structure()
 neural.train_test_split()
-neural.run()
+neural.run(epochs=500)
