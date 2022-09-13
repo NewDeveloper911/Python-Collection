@@ -34,6 +34,10 @@ class Neural_Network:
         print("The structure of this neural network is:", structure)
 
     def run(self, **kwargs):
+        # Prints the structure of the network
+        neural.structure()
+        neural.train_test_split()
+
         epochs = kwargs['epochs']
         for i in range(epochs):
             #Forward pass
@@ -175,7 +179,4 @@ target_values = pd.read_csv(target_directory, engine="python")
 
 #I'm currently creating a neural network with an input layer and 3 hidden layers
 neural = Neural_Network(inputs=network_inputs, learning_rate=1.3, no_layers=4, targets=target_values['gender'])
-#Prints the structure of the network
-neural.structure()
-neural.train_test_split()
 neural.run(epochs=500)
