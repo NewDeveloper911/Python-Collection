@@ -75,7 +75,7 @@
 
 
 	{% for item in posts %}
-	<img id="post"style="float:left;" src="{{ item.question_author.avatar(128) }}">
+	<img id="post"style="float:left; height: 10%; width: 10%;" src="{{ item.question_author.avatar(256) }}">
 	<a id="post" style="float:right;" href="{{url_for('blueprint.upvote', id=item.id)}}" class="btn btn-success">Upvote</a>
 	<a id="post" style="float:right;" href="{{url_for('blueprint.downvote', id=item.id)}}" class="btn btn-danger">Downvote</a>
 		<h1>Question: {{ item.title }}</h1>
@@ -83,6 +83,7 @@
 		<p><b>Asked by:</b> {{item.question_author.name }} on {{item.timestamp.strftime("%c")}}</p>
 		<p><b>Upvotes:</b> {{item.upvotes}}</p>
 		<p><b>Downvotes:</b> {{item.downvotes}}</p>
+		<p>Tags: {{item.tags}}</p>
 		{%if item.question_author == user%}
 		<h3>If you ever wish to edit your post:</h3>
 		<form method="POST" action="/education/edit_post/{{item.id}}">
@@ -102,7 +103,7 @@
 		</form>
 		{%for reply in item.replies%}
 			<!-- Make a similar upvote and downvote system using the Replies database-->
-			<img id="post"style="float:left;" src="{{ reply.comment_author.avatar(128) }}">
+			<img id="post"style="float:left; height: 10%; width: 10%;" src="{{ reply.comment_author.avatar(256) }}">
 			<a id="post" style="float:right;" href="{{url_for('blueprint.post_upvote', id=reply.id)}}" class="btn btn-success">Upvotes: {{reply.upvotes}}</a>
 			<a id="post" style="float:right;" href="{{url_for('blueprint.post_downvote', id=reply.id)}}" class="btn btn-danger">Downvotes: {{reply.downvotes}}</a>
 			<p class="data1"><b>Answered by:</b> {{reply.comment_author.name }} on {{reply.timestamp.strftime("%c")}}</p>

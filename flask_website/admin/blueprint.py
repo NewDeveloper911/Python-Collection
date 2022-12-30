@@ -13,13 +13,15 @@ downvote = 1
 @blueprint.route("/") 
 def home():
     Posts = Learning.query.limit(5) # Fetches all todos from my database
-    return render_template("flaskindex.html", posts=Posts, user=users.query.filter_by(name=session.get('user')).first())
+    return render_template("flaskindex.html", posts=Posts, user=users.query.filter_by(name=session.get('user')).first(),detail=str(session['user']))
 
 @blueprint.route("/contribute", methods=['POST','GET'])
 def contribute():
     if request.method == 'POST':
         title=request.form.get('title')
         body=request.form.get('body')
+        tags=request.form.get('tags').split(', ')
+
         if not title or len(title) < 12:
             flash("Please ensure that you have entered a question of a reasonable length", category='warning')
         elif not body or len(body) < 12:
@@ -30,10 +32,13 @@ def contribute():
             db.session.commit()
             flash("Post submitted successfully", category='message')
 
-        tags=request.form.get('tags').split(', ')
         for i in tags:
-            new_tag = Tag(name=i)
-            db.session.add(new_tag)
+            tag_present = Tag.query.filter_by(name=i).first()
+            if tag_present:
+                pass
+            else:
+                new_tag = Tag(name=i)
+                db.session.add(new_tag)
             db.session.commit()
 
     #Save until I actually implement upvotes and downvotes

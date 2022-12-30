@@ -126,8 +126,10 @@
 	<div class="main-container">
 		<div class="fixer-container">
 			<h4 id="title_text">Pomodoro timer</h4>
-			<div id="app"></div>
-			<!--
+			<div id="app">
+				<!-- The website used to display the circle is banned by my ISP-->
+			</div>
+
 				<label>Select how many minutes you want to work for:
 					<input list="browsers" name="pomodoro"/></label>
 					<datalist id="browsers">
@@ -140,7 +142,7 @@
 					</datalist>
 				<br>
 				<input type="submit" value='Set cycle'> 
-			 -->
+				
 			<form action="/education/pomodoro" method='POST'>
 				
 				<input type="button" id="start" class="btn btn-success" size="height:5%;width=45%" value="Start" onclick="Start()">
