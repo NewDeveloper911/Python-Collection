@@ -32,14 +32,16 @@ def contribute():
             db.session.commit()
             flash("Post submitted successfully", category='message')
 
-        for i in tags:
-            tag_present = Tag.query.filter_by(name=i).first()
-            if tag_present:
-                pass
-            else:
-                new_tag = Tag(name=i)
-                db.session.add(new_tag)
-            db.session.commit()
+            for i in tags:
+                tag_present = Tag.query.filter_by(name=i).first()
+                if tag_present:
+                    new_post.tags.append(tag_present)
+                else:
+                    new_tag = Tag(name=i)
+                    db.session.add(new_tag)
+                    db.session.commit()
+                    new_post.tags.append(new_tag)
+                db.session.commit()
 
     #Save until I actually implement upvotes and downvotes
     #return render_template("flaskindex.html", detail=str(session.get('user')), user=users.query.filter_by(name=session.get('user')).first(), posts=Learning.query.filter(Learning.upvotes>Learning.downvotes).order_by(Learning.upvotes-Learning.downvotes).limit(10))

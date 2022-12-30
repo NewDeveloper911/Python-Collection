@@ -83,7 +83,9 @@
 		<p><b>Asked by:</b> {{item.question_author.name }} on {{item.timestamp.strftime("%c")}}</p>
 		<p><b>Upvotes:</b> {{item.upvotes}}</p>
 		<p><b>Downvotes:</b> {{item.downvotes}}</p>
-		<p>Tags: {{item.tags}}</p>
+		<!-- Change the print statement to incorporate bubbles later on - Python for those
+		who are not familiar with the statement-->
+		<p>Tags: {%for tag in item.tags%} {%print(tag.name)%} {%endfor%}</p>
 		{%if item.question_author == user%}
 		<h3>If you ever wish to edit your post:</h3>
 		<form method="POST" action="/education/edit_post/{{item.id}}">
