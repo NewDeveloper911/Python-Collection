@@ -63,15 +63,14 @@ class Todo(db.Model):
 association_table = db.Table(
     'association',
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
-    db.Column('learning_id', db.Integer, db.ForeignKey('learning.id'))
+    db.Column('post_id', db.Integer, db.ForeignKey('learning.id'))
 )
 
 class Tag(db.Model):
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     name = db.Column(db.String(50), nullable=False)
-    post_id = db.Column(db.Integer,db.ForeignKey('learning.id'), primary_key=True)
-    author = db.relationship('Learning',secondary=association_table,backref='post_tags')
+    #post_id = db.Column(db.Integer,db.ForeignKey('learning.id'), primary_key=True)
 
     def __repr__(self):
         return '<Tag name: {}>'.format(self.name)
@@ -87,6 +86,7 @@ class Learning(db.Model):
     last_modified = db.Column(db.DateTime, index=True, default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     replies = db.relationship('Replies', backref='post')
+    tags = db.relationship('Tag',secondary=association_table,backref='post')
     
     def __repr__(self):
         return '<Post title: {}>'.format(self.title)
