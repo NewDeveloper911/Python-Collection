@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, redirect, url_for, render_template,request, session, flash, current_app
+from flask import Flask, Blueprint, redirect, url_for, render_template,request, session, flash, current_app, g
 from databases import db, Learning, Tag, users, Replies #This allows me to access databases in other files
 import datetime
 
@@ -13,7 +13,7 @@ downvote = 1
 @blueprint.route("/") 
 def home():
     Posts = Learning.query.limit(5) # Fetches all todos from my database
-    return render_template("flaskindex.html", posts=Posts, user=users.query.filter_by(name=session.get('user')).first())
+    return render_template("flaskindex.html", posts=Posts, user=users.query.filter_by(name=g.user).first())
 
 @blueprint.route("/contribute", methods=['POST','GET'])
 def contribute():
