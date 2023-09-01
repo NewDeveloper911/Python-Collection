@@ -23,12 +23,12 @@ while confirm.upper() != "Y":
     if toppingNum > 0 and toppingNum <= 3:
         for i in range(toppingNum):
             toppingchoice =  input("Please input a topping:\n")
-            while toppingchoice.upper() != "PEPPERONI" and toppingchoice.upper() != "CHICKEN" and toppingchoice.upper() != "EXTRA CHEESE" and toppingchoice.upper() != "MUSHROOMS" and toppingchoice.upper() != "SPINACH" and toppingchoice.upper() != "OLIVES":
+            while toppingchoice.upper() not in ["PEPPERONI","CHICKEN","EXTRA CHEESE","MUSHROOMS","SPINACH","OLIVES"]:
                 rtoppingchoice = input("ERROR: Please enter a valid choice\n")
-                if rtoppingchoice.upper() != "PEPPERONI" or rtoppingchoice.upper() != "CHICKEN" or rtoppingchoice.upper() != "EXTRA CHEESE" or rtoppingchoice.upper() != "MUSHROOMS" or rtoppingchoice.upper() != "SPINACH" or rtoppingchoice.upper() != "OLIVES":
+                if rtoppingchoice.upper() in ["PEPPERONI","CHICKEN","EXTRA CHEESE","MUSHROOMS","SPINACH","OLIVES"]:
                     break
                     
-            if toppingchoice.upper() != "PEPPERONI" or toppingchoice.upper() != "CHICKEN" or toppingchoice.upper() != "EXTRA CHEESE" or toppingchoice.upper() != "MUSHROOMS" or toppingchoice.upper() != "SPINACH" or toppingchoice.upper() != "OLIVES":
+            if toppingchoice.upper() not in ["PEPPERONI","CHICKEN","EXTRA CHEESE","MUSHROOMS","SPINACH","OLIVES"]:
                 toppings.append(toppingchoice)
             else:
                 toppings.append(rtoppingchoice)
@@ -41,12 +41,12 @@ while confirm.upper() != "Y":
                 toppingNum = srtopNum
                 for i in range(toppingNum):
                     toppingchoice =  input("Please input a topping:\n")
-                    while toppingchoice.upper() != "PEPPERONI" and toppingchoice.upper() != "CHICKEN" and toppingchoice.upper() != "EXTRA CHEESE" and toppingchoice.upper() != "MUSHROOMS" and toppingchoice.upper() != "SPINACH" and toppingchoice.upper() != "OLIVES":
+                    while toppingchoice.upper() not in ["PEPPERONI","CHICKEN","EXTRA CHEESE","MUSHROOMS","SPINACH","OLIVES"]:
                         rtoppingchoice = input("ERROR: Please enter a valid choice\n")
-                        if rtoppingchoice.upper() != "PEPPERONI" or rtoppingchoice.upper() != "CHICKEN" or rtoppingchoice.upper() != "EXTRA CHEESE" or rtoppingchoice.upper() != "MUSHROOMS" or rtoppingchoice.upper() != "SPINACH" or rtoppingchoice.upper() != "OLIVES":
+                        if rtoppingchoice.upper() not in ["PEPPERONI","CHICKEN","EXTRA CHEESE","MUSHROOMS","SPINACH","OLIVES"]:
                             toppingNum = srtopNum
                             break
-                    if toppingchoice.upper() != "PEPPERONI" or toppingchoice.upper() != "CHICKEN" or toppingchoice.upper() != "EXTRA CHEESE" or toppingchoice.upper() != "MUSHROOMS" or toppingchoice.upper() != "SPINACH" or toppingchoice.upper() != "OLIVES":
+                    if toppingchoice.upper() not in ["PEPPERONI","CHICKEN","EXTRA CHEESE","MUSHROOMS","SPINACH","OLIVES"]:
                         toppings.append(toppingchoice)
                     else:
                         toppings.append(rtoppingchoice)
