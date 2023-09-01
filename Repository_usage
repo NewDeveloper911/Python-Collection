@@ -1,0 +1,4 @@
+I've had to install all python packages within the virtual environment.
+To open the venv and thus use the packages, use:
+        venv\Scripts\activate
+To close when done, simply type 'deactivate'

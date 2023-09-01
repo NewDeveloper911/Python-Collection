@@ -124,7 +124,7 @@ network_inputs = data
 target_directory = GetStuff().get_directory("starting_data.csv")
 target_values = pd.read_csv(target_directory, engine="python")
 #I'm currently creating a neural network with an input layer and 3 hidden layers
-neural = Neural_Network(inputs=network_inputs, no_layers=4, targets=target_values)
+neural = Neural_Network(inputs=network_inputs, no_layers=4, targets=target_values, learning_rate=0.15)
 #Prints the structure of the network
 neural.structure()
 neural.train_test_split()
