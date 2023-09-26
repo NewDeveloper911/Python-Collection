@@ -1,0 +1,26 @@
+from concurrent.futures import ThreadPoolExecutor
+import os
+
+SEARCH_PATHS = [
+   "C:/Users/Nana Yaw/OneDrive",
+   "D:/",
+   "C:/Users/Nana Yaw/Python-Collection",
+]
+
+FILES = ['form_input.csv','dataset.csv']
+
+def process_directory(directory):
+    directories = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file in FILES:
+                directories.append(os.path.join(root, file))
+    return directories
+
+result = []
+
+with ThreadPoolExecutor() as executor:
+    for rv in executor.map(process_directory, SEARCH_PATHS):
+        result.append(rv)
+
+print(result)

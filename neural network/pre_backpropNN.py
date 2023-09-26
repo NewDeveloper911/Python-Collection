@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import pandas as pd
-import csv
+
 class Neural_Network:
     def __init__(self,**kwargs):
         self._network = []
@@ -40,7 +40,9 @@ class Neural_Network:
         for i in range(len(self._network)-1):
             #Using the previous layer's outputs as the next layer's inputs
             self._network[i+1].forward(self._network[i].output)
-        print("The network's outputs were:", self._network[-1].output)
+            
+        #Normalised to represent the probablity of each category being correct
+        print("The network's outputs were:", self._network[-1].output * 100 / np.sum(self._network[-1].output, axis=1, keepdims=True))
 
         #Evaluation needed for backpropagation
 
@@ -49,7 +51,7 @@ class Neural_Network:
         for i in range(len(self._network)-1):
             #Using the previous layer's outputs as the next layer's inputs
             self._network[i+1].forward(self._network[i].output)
-        print("The network's testing outputs were:", self._network[-1].output)
+        print("The network's testing outputs were:", self._network[-1].output * 100 / np.sum(self._network[-1].output, axis=1, keepdims=True))
 
     def train_test_split(self):
         #Split the available dataset into training data and testing data
@@ -61,25 +63,25 @@ class Neural_Network:
         self._inputs = training_data
         self._testing_data = testing_data
 
-    def evaluate(self):
-        final_outputs = self._network[-1].output
-        total_age_error = 0.0
-        total_gender_error = 0.0
-        total_politic_error = 0.0
-        for i in len(final_outputs):
-            #Figure out a way to get the final outputs  unaffected by the activation function or I affect the 
-            #target values with the same activation function
-            gender = final_outputs[i][0]
-            political_affiliations = final_outputs[i][1]
-            age = final_outputs[i][2]
-
-            target_gender = self._target_values.iloc[i][0]
-            target_political_affiliations = self._target_values.iloc[i][1]
-            target_age = float(self._target_values.iloc[i][2])
-
-            age_error = abs(target_age - age)
-            politic_error = abs(target_political_affiliations-political_affiliations)
-            gender_error = abs(target_gender-gender)
+    #Can be used to evaluate the loss of the neural network
+    def calculateLoss(self, y_pred, y_true):
+        samples = len(y_pred)
+        y_pred_clipped = np.clip(y_pred, 1e-10, 1-1e-10)
+        if len(y_true.shape) == 1:
+            #Only scalar class values have been passed - no one-hot encoding
+            correct_confidences = y_pred_clipped[range(samples), y_true]
+        elif len(y_true.shape) == 2:
+            #Using one-hot encoded vectors
+            correct_confidences = np.sum(y_pred_clipped*y_true, axis=1)
+        sample_losses = -np.log(correct_confidences)
+        data_loss = np.mean(sample_losses)
+        return data_loss
+    
+    #Can also display percentages of how many training examples were guessed correctly
+    def calculateAccuracy(self, y_pred, y_true):
+        predictions = np.argmax(y_pred, axis=1)
+        accuracy = np.mean(predictions == y_true) * 100
+        print('Accuracy: {}%'.format(accuracy))
   
 class GetStuff():
     def __init__(cls):
@@ -89,6 +91,14 @@ class GetStuff():
             for name in files:
                 if name == file_name:
                     return os.path.abspath(os.path.join(root, name))
+                
+    def get_Softmax(cls, inputs):
+        #Axis 1 means that we deal with each training pair array at a time
+        #Keepdims makes sure that any matrix multiplcaition applies to the training pair
+        exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
+        probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
+        return probabilities
+    
 class Layer_Dense:
     def __init__(self, **kwargs):
         self._neurons = kwargs['no_neurons']
@@ -118,11 +128,11 @@ class Layer_Dense:
   
 #First, I'll need to fetch the inputs from a pre-processed dataset which I've created earlier
 input_directory = GetStuff().get_directory("dataset.csv")
-data = pd.read_csv(input_directory, engine="python")
+data = pd.read_csv(input_directory, engine="python",header=0).iloc[:,1:]
 network_inputs = data
 #Then, fetch the data with the values that I'm meant to be predicting
 target_directory = GetStuff().get_directory("starting_data.csv")
-target_values = pd.read_csv(target_directory, engine="python")
+target_values = pd.read_csv(target_directory, engine="python",header=0).iloc[:,1:]
 #I'm currently creating a neural network with an input layer and 3 hidden layers
 neural = Neural_Network(inputs=network_inputs, no_layers=4, targets=target_values, learning_rate=0.15)
 #Prints the structure of the network
