@@ -10,7 +10,6 @@ class Neural_Network:
         self._testing_data = None
         self._target_values = kwargs['targets']
         self._learning_rate = kwargs['learning_rate']
-        self._output_percentages = []
 
         activation_function = input("Which activation function do you wish to use?\n")
         for i in range(kwargs['no_layers']):
@@ -26,7 +25,7 @@ class Neural_Network:
             self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=neurons,activation_function=activation_function))
         outputs = int(input("How many outputs do you wish to have in your neural network?\n"))
         inputs = self._network[-1].get_neurons()
-        self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=outputs,activation_function="softmax"))
+        self._network.append(Layer_Dense(no_inputs=inputs,no_neurons=outputs,activation_function=activation_function))
 
     def structure(self):
         self.structure = []
@@ -42,11 +41,14 @@ class Neural_Network:
         epochs = kwargs['epochs']
         for i in range(epochs):
             for b in range(len(self.batches)):
-                #Forward pass
-                self._network[0].forward(self.batches[b].values)
-                for i in range(len(self._network)-1):
-                    #Using the previous layer's outputs as the next layer's inputs
-                    self._network[i+1].forward(self._network[i].outputs)
+                for i in range(len(self._network)):
+                    if i != 0:
+                        #Using the previous layer's outputs as the next layer's inputs
+                        self._network[i].forward(self._network[i-1].outputs)
+                        print(i, "has the following outputs: \n", len(self._network[i].outputs[0]), "\n")
+                    else:
+                        #Forward pass
+                        self._network[0].forward(self.batches[b].values)
 
                 #Here, I could run the cost function to see how the program is performing
                 totalCost = self.totalCost(self.batches[b].values, self.expectedBatchValues[b].values)
@@ -56,11 +58,14 @@ class Neural_Network:
                 self.learn(self.batches[b], self.expectedBatchValues[b])
 
         #//TESTING PHASE
-        #Start by putting initial inputs into the input layer
-        self._network[0].forward(self._testing_data)
-        for i in range(len(self._network)-1):
-            #Using the previous layer's outputs as the next layer's inputs
-            self._network[i+1].forward(self._network[i].output)
+        for i in range(len(self._network)):
+            if i != 0:
+                #Using the previous layer's outputs as the next layer's inputs
+                self._network[i].forward(self._network[i-1].outputs)
+            else:
+                #Start by putting initial inputs into the input layer
+                self._network[0].forward(self._testing_data)
+
         print("The network's testing outputs were:", self._network[-1].output)
 
     def train_test_split(self):
@@ -131,14 +136,16 @@ class Neural_Network:
     #Basically our loss function
     def cost(self, dataPoint, expectedValues):
         #ExpectedValues should not be a one-hot encoded vector of the categories whih I am predicting for each row in the database (the dataPoint) - at least that's not how Sebastien Lague did it
-        #Forward pass
-        self._network[0].forward(dataPoint)
-        for i in range(1,len(self._network)):
-            #Using the previous layer's outputs as the next layer's inputs
-            self._network[i].forward(self._network[i-1].outputs)
+        for i in range(len(self._network)):
+            if i != 0:
+                #Using the previous layer's outputs as the next layer's inputs
+                self._network[i].forward(self._network[i-1].outputs)
+            else:
+                #Forward pass
+                self._network[0].forward(dataPoint)
+
         cost = 0
         #Probably due to encapsulation but the getter refused to be got, so this is a workaround
-
         for i in range(self.structure[-1]):
             cost += self._network[-1].nodeCost(self._network[-1].outputs[i], expectedValues.iloc[i])
         return cost
@@ -212,13 +219,12 @@ class Layer_Dense:
     def forward(self, inputs):
         self.inputs = inputs
         preActivationOutputs =  np.dot(inputs, self.weights) + self.biases
-        if self._activation_function == "sigmoid":
-            if len(self.outputs) < 1:
-                for i in range(len(GetStuff().get_softmax(preActivationOutputs))):    
-                    self.outputs.append(GetStuff().get_softmax(preActivationOutputs))
+        if self._activation_function == "softmax":
+            self.outputs = GetStuff().get_softmax(preActivationOutputs)
             return self.outputs
         else:
             #Can later implement other activation functions here like leaky ReLU
+            print("Could be an issue here, son")
             pass
 
     def clearGradients(self):
@@ -274,7 +280,6 @@ class Layer_Dense:
             newnodeValue *= GetStuff.get_softmax_derivative(self.outputs[i])
             newnodeValues[i] = newnodeValue
         return newnodeValues
-
 
 #First, I'll need to fetch the inputs from a pre-processed dataset which I've created earlier
 #I was sick of waiting, so i've utilising multithreading to find files much faster

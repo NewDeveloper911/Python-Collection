@@ -43,7 +43,7 @@ class Neural_Network:
             self._network[i+1].forward(self._network[i].output)
             
         #Normalised to represent the probablity of each category being correct
-        print("The network's outputs were:", self._network[-1].output * 100 / np.sum(self._network[-1].output, axis=1, keepdims=True))
+        print("The network's outputs were:", self._network[-1].output / np.sum(self._network[-1].output, axis=1, keepdims=True))
 
         #Evaluation needed for backpropagation
 
@@ -52,7 +52,7 @@ class Neural_Network:
         for i in range(len(self._network)-1):
             #Using the previous layer's outputs as the next layer's inputs
             self._network[i+1].forward(self._network[i].output)
-        print("The network's testing outputs were:", self._network[-1].output * 100 / np.sum(self._network[-1].output, axis=1, keepdims=True))
+        print("The network's testing outputs were:", self._network[-1].output/ np.sum(self._network[-1].output, axis=1, keepdims=True))
 
     def train_test_split(self):
         #Split the available dataset into training data and testing data
@@ -87,11 +87,6 @@ class Neural_Network:
 class GetStuff():
     def __init__(cls):
         pass
-    def get_directory(cls,file_name):
-        for root, dirs, files in os.walk(r'/'):
-            for name in files:
-                if name == file_name:
-                    return os.path.abspath(os.path.join(root, name))
                 
     def get_Softmax(cls, inputs):
         #Axis 1 means that we deal with each training pair array at a time
@@ -133,8 +128,16 @@ searchPaths = [os.environ['ONEDRIVE'], os.environ['VIRTUAL_ENV'][:-5], 'D:/']
 filesToSearch = ["dataset.csv", "starting_data.csv"]  
 result = []
 
+def process_directory(directory):
+    directories = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file in filesToSearch:
+                directories.append(os.path.join(root, file))
+    return directories
+
 with ThreadPoolExecutor() as executor:
-    for rv in executor.map(GetStuff().get_directory, searchPaths):
+    for rv in executor.map(process_directory, searchPaths):
         result.extend(rv)
 
 input_directory = result[0]
@@ -149,10 +152,11 @@ target_values = pd.read_csv(target_directory, engine="python")
 #.drop(['political','age'],axis=1).iloc[:,0]
 
 #One hot encoding can be used here to turn categorical variables into number patterns matching the ideal variables
-one_hot_encode = pd.get_dummies(target_values, columns=['gender'], dtype=int).iloc[:,2:]
+one_hot_encode = pd.get_dummies(target_values, columns=['political'], dtype=int).iloc[:,2:]
+print(one_hot_encode)
 
 #I'm currently creating a neural network with an input layer and 3 hidden layers
-neural = Neural_Network(inputs=network_inputs, no_layers=4, targets=target_values, learning_rate=0.15)
+neural = Neural_Network(inputs=network_inputs, no_layers=4, targets=one_hot_encode, learning_rate=0.15)
 #Prints the structure of the network
 neural.structure()
 neural.train_test_split()
