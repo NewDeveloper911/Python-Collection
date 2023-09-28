@@ -45,7 +45,6 @@ class Neural_Network:
                     if i != 0:
                         #Using the previous layer's outputs as the next layer's inputs
                         self._network[i].forward(self._network[i-1].outputs)
-                        print(i, "has the following outputs: \n", len(self._network[i].outputs[0]), "\n")
                     else:
                         #Forward pass
                         self._network[0].forward(self.batches[b].values)
@@ -53,7 +52,7 @@ class Neural_Network:
                 #Here, I could run the cost function to see how the program is performing
                 totalCost = self.totalCost(self.batches[b].values, self.expectedBatchValues[b].values)
                 accuracy = GetStuff().calculateAccuracy(self.batches[b].values, self.expectedBatchValues[b].values)
-                print("Batch number {} in epoch:\n\tCost: {}\n\tAccuracy: {}".format(b+1,totalCost,accuracy))
+                print("Batch number {} in epoch:\n\tCost: {}\n\tAccuracy: {}%".format(b+1,totalCost,accuracy))
 
                 self.learn(self.batches[b], self.expectedBatchValues[b])
 
@@ -105,7 +104,7 @@ class Neural_Network:
         #Backpropagation happens here
         #I could use threading to run several batches simultaneously to improve speed
         for value in range(len(trainingBatch)):
-            self.updateAllGradients(trainingBatch[value],expectedValues.iloc[value])
+            self.updateAllGradients(trainingBatch.iloc[value,:],expectedValues.iloc[value,:])
 
         #Adjust all gradients
         for layer in self._network:
@@ -120,10 +119,11 @@ class Neural_Network:
         self._network[0].forward(dataPoint)
         for i in range(len(self._network)-1):
             #Using the previous layer's outputs as the next layer's inputs
-            outputs = self._network[i+1].forward(self._network[i].output)
+            outputs = self._network[i+1].forward(self._network[i].outputs)
         outputLayer = self._network[-1]
 
         #Updates the gradients of the output layer
+        print(expectedValues)
         nodeValues = outputLayer.calcFinalNodeValues(expectedValues)
         outputLayer.updateGradients(nodeValues)
 
@@ -146,8 +146,12 @@ class Neural_Network:
 
         cost = 0
         #Probably due to encapsulation but the getter refused to be got, so this is a workaround
-        for i in range(self.structure[-1]):
-            cost += self._network[-1].nodeCost(self._network[-1].outputs[i], expectedValues.iloc[i])
+        for i in range(len(self._network[-1].outputs)):
+            #Need the compare the values at the index in the expected values which is a one
+            #Basically one-hot encoding the expected categories and using those to calculate error
+            #Could do automatically by storing the header names
+            one_hot = expectedValues.argmax(axis=1, keepdims=True)[i]
+            cost += self._network[-1].nodeCost(self._network[-1].outputs[i][one_hot], expectedValues[i][one_hot])
         return cost
     
     def totalCost(self, input_data, expectedValues):
@@ -224,7 +228,6 @@ class Layer_Dense:
             return self.outputs
         else:
             #Can later implement other activation functions here like leaky ReLU
-            print("Could be an issue here, son")
             pass
 
     def clearGradients(self):
