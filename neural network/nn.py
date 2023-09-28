@@ -46,7 +46,7 @@ class Neural_Network:
                 self._network[0].forward(self.batches[b].values)
                 for i in range(len(self._network)-1):
                     #Using the previous layer's outputs as the next layer's inputs
-                    self._network[i+1].forward(self._network[i]._outputs)
+                    self._network[i+1].forward(self._network[i].outputs)
 
                 #Here, I could run the cost function to see how the program is performing
                 totalCost = self.totalCost(self.batches[b].values, self.expectedBatchValues[b].values)
@@ -133,13 +133,14 @@ class Neural_Network:
         #ExpectedValues should not be a one-hot encoded vector of the categories whih I am predicting for each row in the database (the dataPoint) - at least that's not how Sebastien Lague did it
         #Forward pass
         self._network[0].forward(dataPoint)
-        for i in range(len(self._network)-1):
+        for i in range(1,len(self._network)):
             #Using the previous layer's outputs as the next layer's inputs
-            self._network[i+1].forward(self._network[i]._outputs)
+            self._network[i].forward(self._network[i-1].outputs)
         cost = 0
         #Probably due to encapsulation but the getter refused to be got, so this is a workaround
+
         for i in range(self.structure[-1]):
-            cost += self._network[-1].nodeCost(self._network[-1]._outputs[i], expectedValues.iloc[i])
+            cost += self._network[-1].nodeCost(self._network[-1].outputs[i], expectedValues.iloc[i])
         return cost
     
     def totalCost(self, input_data, expectedValues):
@@ -193,6 +194,7 @@ class GetStuff():
 class Layer_Dense:
     def __init__(self, **kwargs):
         self.inputs = []
+        self.outputs = []
         self._neurons = kwargs['no_neurons']
         self._activation_function = kwargs.get('activation_function')
         #Original line which works with normal array
@@ -211,8 +213,10 @@ class Layer_Dense:
         self.inputs = inputs
         preActivationOutputs =  np.dot(inputs, self.weights) + self.biases
         if self._activation_function == "sigmoid":
-            self._outputs = GetStuff().get_softmax(preActivationOutputs)
-            return self._outputs
+            if len(self.outputs) < 1:
+                for i in range(len(GetStuff().get_softmax(preActivationOutputs))):    
+                    self.outputs.append(GetStuff().get_softmax(preActivationOutputs))
+            return self.outputs
         else:
             #Can later implement other activation functions here like leaky ReLU
             pass
@@ -224,7 +228,7 @@ class Layer_Dense:
 
     def backward(self, learning_rate):
             #Alters the gradients of the weights and biases during learning
-            for i in self._outputs:
+            for i in self.outputs:
                 self.biases[i] -= self.biasCosts[i] * learning_rate
                 for j in self.get_neurons():
                     self.weights[j,i] -= self.weightCosts[j,i] * learning_rate
@@ -253,21 +257,21 @@ class Layer_Dense:
     def calcFinalNodeValues(self, expectedValues):
         nodeValues = []
         for i in len(expectedValues):
-            costDerivative = self.nodeCostDerivative(self._outputs[i], expectedValues[i])
+            costDerivative = self.nodeCostDerivative(self.outputs[i], expectedValues[i])
             #Assuming that the user chose to use the sigmoid function - can change for other activation functions later
             #If we used the derivative as just 1 / (1 - e**weighted-Input), then the derivative would take in the weightedInputs
-            activationDerivative = GetStuff().get_softmax_derivative(self._outputs)
+            activationDerivative = GetStuff().get_softmax_derivative(self.outputs)
             nodeValues[i] = costDerivative * activationDerivative
         return nodeValues
     
     def calcHiddenNodeValues(self, oldLayer, oldNodeValues):
         newnodeValues = []
-        for i in len(self._outputs[0]):
+        for i in len(self.outputs[0]):
             newnodeValue = 0
             for j in range(len(oldNodeValues)):
                 weightedInputDerivative = oldLayer.weights[i,j]
                 newnodeValue = weightedInputDerivative * oldNodeValues[j]
-            newnodeValue *= GetStuff.get_softmax_derivative(self._outputs[i])
+            newnodeValue *= GetStuff.get_softmax_derivative(self.outputs[i])
             newnodeValues[i] = newnodeValue
         return newnodeValues
 

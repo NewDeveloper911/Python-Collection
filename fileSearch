@@ -1,11 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 import os
 
-SEARCH_PATHS = [
-   "C:/Users/Nana Yaw/OneDrive",
-   "D:/",
-   "C:/Users/Nana Yaw/Python-Collection",
-]
+SEARCH_PATHS = [os.environ['ONEDRIVE'], os.environ['VIRTUAL_ENV'][:-5], 'D:/']
 
 FILES = ['form_input.csv','dataset.csv']
 

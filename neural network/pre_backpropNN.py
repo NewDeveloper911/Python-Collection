@@ -1,4 +1,5 @@
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor
 import os
 import pandas as pd
 
@@ -127,12 +128,29 @@ class Layer_Dense:
 
   
 #First, I'll need to fetch the inputs from a pre-processed dataset which I've created earlier
-input_directory = GetStuff().get_directory("dataset.csv")
-data = pd.read_csv(input_directory, engine="python",header=0).iloc[:,1:]
+#I was sick of waiting, so i've utilising multithreading to find files much faster
+searchPaths = [os.environ['ONEDRIVE'], os.environ['VIRTUAL_ENV'][:-5], 'D:/']
+filesToSearch = ["dataset.csv", "starting_data.csv"]  
+result = []
+
+with ThreadPoolExecutor() as executor:
+    for rv in executor.map(GetStuff().get_directory, searchPaths):
+        result.extend(rv)
+
+input_directory = result[0]
+data = pd.read_csv(input_directory, engine="python").iloc[:,1:]
 network_inputs = data
+
 #Then, fetch the data with the values that I'm meant to be predicting
-target_directory = GetStuff().get_directory("starting_data.csv")
-target_values = pd.read_csv(target_directory, engine="python",header=0).iloc[:,1:]
+target_directory = result[1]
+target_values = pd.read_csv(target_directory, engine="python")
+
+#Maybe add the below line to the target_values if things still don't work
+#.drop(['political','age'],axis=1).iloc[:,0]
+
+#One hot encoding can be used here to turn categorical variables into number patterns matching the ideal variables
+one_hot_encode = pd.get_dummies(target_values, columns=['gender'], dtype=int).iloc[:,2:]
+
 #I'm currently creating a neural network with an input layer and 3 hidden layers
 neural = Neural_Network(inputs=network_inputs, no_layers=4, targets=target_values, learning_rate=0.15)
 #Prints the structure of the network
