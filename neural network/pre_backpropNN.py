@@ -151,9 +151,14 @@ target_values = pd.read_csv(target_directory, engine="python")
 #Maybe add the below line to the target_values if things still don't work
 #.drop(['political','age'],axis=1).iloc[:,0]
 
+columns = target_values.columns
+print("Please enter the corresponding number to the column which you would like to predict:\n")
+for i in range(len(columns)):
+    print(i+1, ":", columns[i])
+predictor = int(input("Please make your choice:\n"))
+
 #One hot encoding can be used here to turn categorical variables into number patterns matching the ideal variables
-one_hot_encode = pd.get_dummies(target_values, columns=['political'], dtype=int).iloc[:,2:]
-print(one_hot_encode)
+one_hot_encode = pd.get_dummies(target_values, columns=[target_values.columns[predictor - 1]], dtype=int).iloc[:,2:]
 
 #I'm currently creating a neural network with an input layer and 3 hidden layers
 neural = Neural_Network(inputs=network_inputs, no_layers=4, targets=one_hot_encode, learning_rate=0.15)

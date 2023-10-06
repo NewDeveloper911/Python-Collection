@@ -52,7 +52,7 @@ class Neural_Network:
                 #Here, I could run the cost function to see how the program is performing
                 totalCost = self.totalCost(self.batches[b].values, self.expectedBatchValues[b].values)
                 accuracy = GetStuff().calculateAccuracy(self.batches[b].values, self.expectedBatchValues[b].values)
-                print("Batch number {} in epoch:\n\tCost: {}\n\tAccuracy: {}%".format(b+1,totalCost,accuracy))
+                print("Batch number {} in epoch {}:\n\tCost: {}\n\tAccuracy: {}%".format(b+1,i+1,totalCost,accuracy))
 
                 self.learn(self.batches[b], self.expectedBatchValues[b])
 
@@ -123,7 +123,6 @@ class Neural_Network:
         outputLayer = self._network[-1]
 
         #Updates the gradients of the output layer
-        print(expectedValues)
         nodeValues = outputLayer.calcFinalNodeValues(expectedValues)
         outputLayer.updateGradients(nodeValues)
 
@@ -266,9 +265,10 @@ class Layer_Dense:
     def calcFinalNodeValues(self, expectedValues):
         nodeValues = []
         for i in len(expectedValues):
+            #Error which I got when trying to get the columns of the expectedValues:
+            #AttributeError: 'Series' object has no attribute 'columns'
+            #Apparently doesn't work here as the row thinks it's an int32
             costDerivative = self.nodeCostDerivative(self.outputs[i], expectedValues[i])
-            #Assuming that the user chose to use the sigmoid function - can change for other activation functions later
-            #If we used the derivative as just 1 / (1 - e**weighted-Input), then the derivative would take in the weightedInputs
             activationDerivative = GetStuff().get_softmax_derivative(self.outputs)
             nodeValues[i] = costDerivative * activationDerivative
         return nodeValues
@@ -300,11 +300,14 @@ network_inputs = data
 target_directory = result[1]
 target_values = pd.read_csv(target_directory, engine="python")
 
-#Maybe add the below line to the target_values if things still don't work
-#.drop(['political','age'],axis=1).iloc[:,0]
+columns = target_values.columns
+print("Please enter the corresponding number to the column which you would like to predict:\n")
+for i in range(len(columns)):
+    print(i+1, ":", columns[i])
+predictor = int(input("Please make your choice:\n"))
 
 #One hot encoding can be used here to turn categorical variables into number patterns matching the ideal variables
-one_hot_encode = pd.get_dummies(target_values, columns=['gender'], dtype=int).iloc[:,2:]
+one_hot_encode = pd.get_dummies(target_values, columns=[target_values.columns[predictor - 1]], dtype=int).iloc[:,2:]
 
 #I'm currently creating a neural network with an input layer and 3 hidden layers
 neural = Neural_Network(inputs=network_inputs, learning_rate=0.15, no_layers=4, targets=one_hot_encode)
